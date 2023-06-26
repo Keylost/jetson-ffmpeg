@@ -57,10 +57,6 @@ typedef struct _NVFRAME{
 	time_t timestamp;
 }nvFrame;
 
-typedef struct _NVSIZE{
-	unsigned int width;
-	unsigned int height;
-}nvSize;
 
 
 typedef enum {
@@ -77,7 +73,7 @@ typedef enum {
 extern "C" {
 #endif
 
-	nvmpictx* nvmpi_create_decoder(nvCodingType codingType,nvPixFormat pixFormat, nvSize resized);
+	nvmpictx* nvmpi_create_decoder(nvCodingType codingType,nvPixFormat pixFormat);
 
 	int nvmpi_decoder_put_packet(nvmpictx* ctx,nvPacket* packet);
 

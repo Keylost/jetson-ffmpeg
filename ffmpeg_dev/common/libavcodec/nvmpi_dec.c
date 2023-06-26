@@ -13,7 +13,6 @@
 #include "libavutil/hwcontext_drm.h"
 #include "libavutil/imgutils.h"
 #include "libavutil/log.h"
-#include "libavutil/opt.h"
 
 #if LIBAVCODEC_VERSION_MAJOR >= 60
 #include "codec_internal.h"
@@ -25,7 +24,6 @@ typedef struct {
 	nvmpictx* ctx;
 	AVClass *av_class;
 	AVFrame *bufFrame;
-	char *resize_expr;
 } nvmpiDecodeContext;
 
 static nvCodingType nvmpi_get_codingtype(AVCodecContext *avctx)
@@ -46,7 +44,6 @@ static int nvmpi_init_decoder(AVCodecContext *avctx){
 
 	nvmpiDecodeContext *nvmpi_context = avctx->priv_data;
 	nvCodingType codectype=NV_VIDEO_CodingUnused;
-	nvSize resized = {0};
 	
 	codectype =nvmpi_get_codingtype(avctx);
 	if (codectype == NV_VIDEO_CodingUnused) {
@@ -63,20 +60,7 @@ static int nvmpi_init_decoder(AVCodecContext *avctx){
 		av_log(avctx, AV_LOG_ERROR, "Invalid Pix_FMT for NVMPI: Only YUV420P and YUVJ420P are supported\n");
 		return AVERROR_INVALIDDATA;
 	}
-
-    if (nvmpi_context->resize_expr && sscanf(nvmpi_context->resize_expr, "%dx%d",
-                                             &resized.width, &resized.height) != 2) {
-        av_log(avctx, AV_LOG_ERROR, "Invalid resize expressions\n");
-        return AVERROR(EINVAL);
-    }
 	
-	//overwrite avctx w and h if resize option is used
-	if(resized.width && resized.height)
-	{
-		avctx->width = resized.width;
-		avctx->height = resized.height;
-	}
-
 	nvmpi_context->bufFrame = av_frame_alloc();
 	if (ff_get_buffer(avctx, nvmpi_context->bufFrame, 0) < 0) {
 		av_frame_free(&(nvmpi_context->bufFrame));
@@ -84,7 +68,7 @@ static int nvmpi_init_decoder(AVCodecContext *avctx){
 		return AVERROR(ENOMEM);
 	}
 
-	nvmpi_context->ctx=nvmpi_create_decoder(codectype, NV_PIX_YUV420, resized);
+	nvmpi_context->ctx=nvmpi_create_decoder(codectype,NV_PIX_YUV420);
 
 	if(!nvmpi_context->ctx){
 		av_frame_free(&(nvmpi_context->bufFrame));
@@ -159,17 +143,10 @@ static int nvmpi_decode(AVCodecContext *avctx,void *data,int *got_frame, AVPacke
 
 
 
-#define OFFSET(x) offsetof(nvmpiDecodeContext, x)
-#define VD AV_OPT_FLAG_VIDEO_PARAM | AV_OPT_FLAG_DECODING_PARAM
-static const AVOption options[] = {
-    { "resize",   "Resize (width)x(height)", OFFSET(resize_expr), AV_OPT_TYPE_STRING, { .str = NULL }, 0, 0, VD },
-    { NULL }
-};
 
 #define NVMPI_DEC_CLASS(NAME) \
 	static const AVClass nvmpi_##NAME##_dec_class = { \
 		.class_name = "nvmpi_" #NAME "_dec", \
-		.option     = options, \
 		.version    = LIBAVUTIL_VERSION_INT, \
 	};
 
