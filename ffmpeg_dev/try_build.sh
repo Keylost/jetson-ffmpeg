@@ -34,3 +34,14 @@ else
     exit 0
 fi
 cd ..
+
+cd ./ffmpeg6.1
+./configure --enable-nvmpi
+make -j10
+if [ $? -eq 0 ]; then
+    echo "ffmpeg6.1 BUILD OK"
+else
+    echo "ffmpeg6.1 BUILD FAIL"
+    exit 0
+fi
+cd ..
