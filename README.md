@@ -1,5 +1,5 @@
 # jetson-ffmpeg
-L4T Multimedia API for ffmpeg.
+L4T Multimedia API for ffmpeg.  
 This library provides the ability to use hardware acceleration for video encoding and decoding on Nvidia Jetson platforms with the FFmpeg multimedia framework.
 
 ### Jetson/JetPack support table
