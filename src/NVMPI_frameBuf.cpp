@@ -8,14 +8,14 @@ bool NVMPI_frameBuf::alloc(NvBufferCreateParams& input_params)
 	ret = NvBufSurf::NvAllocate(&input_params, 1, &dst_dma_fd);
 	if(ret<0)
 	{
-		std::cout << "Failed to allocate buffer" << std::endl;
+		std::cerr << "Failed to allocate buffer" << std::endl;
 		return false;
 	}
 	
 	ret = NvBufSurfaceFromFd(dst_dma_fd, (void**)(&dst_dma_surface));
 	if(ret<0)
 	{
-		std::cout << "Failed to get surface for buffer" << std::endl;
+		std::cerr << "Failed to get surface for buffer" << std::endl;
 		NvBufferDestroy(dst_dma_fd);
 		dst_dma_fd = -1;
 		return false;
@@ -24,7 +24,7 @@ bool NVMPI_frameBuf::alloc(NvBufferCreateParams& input_params)
 	ret = NvBufferCreateEx(&dst_dma_fd, &input_params);
 	if(ret<0)
 	{
-		std::cout << "Failed to allocate buffer" << std::endl;
+		std::cerr << "Failed to allocate buffer" << std::endl;
 		return false;
 	}
 #endif
@@ -40,7 +40,7 @@ bool NVMPI_frameBuf::destroy()
 		ret = NvBufferDestroy(dst_dma_fd);
 		if(ret<0)
 		{
-			std::cout << "Failed to Destroy NvBuffer" << std::endl;
+			std::cerr << "Failed to Destroy NvBuffer" << std::endl;
 			return false;
 		}
 		dst_dma_fd = -1;
