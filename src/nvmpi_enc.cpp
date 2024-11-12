@@ -13,7 +13,7 @@
 #define TEST_ERROR(condition, message, errorCode)    \
 	if (condition)                               \
 {                                                    \
-	std::cout<< message;                         \
+	std::cerr<< message;                         \
 }
 
 using namespace std;
