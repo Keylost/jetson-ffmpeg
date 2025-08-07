@@ -16,6 +16,10 @@
 	std::cout<< message;                         \
 }
 
+#define OUTPLANE_MEMTYPE_MMAP 0
+#define OUTPLANE_MEMTYPE_DMA 1
+#define OUTPLANE_MEMTYPE OUTPLANE_MEMTYPE_MMAP
+
 using namespace std;
 
 struct nvmpictx
@@ -53,7 +57,7 @@ struct nvmpictx
 
 	NvVideoEncoder *enc;
 	NVMPI_bufPool<nvPacket*>* pktPool;
-	//int output_plane_fd[32]; //TODO
+	int *output_plane_fd; //array to store dmabuf fd's
 };
 
 
@@ -107,7 +111,7 @@ static bool encoder_capture_plane_dq_callback(struct v4l2_buffer *v4l2_buf, NvBu
 	return true;
 }
 
-/*
+#if (OUTPLANE_MEMTYPE == OUTPLANE_MEMTYPE_DMA)
 static int setup_output_dmabuf(nvmpictx *ctx, uint32_t num_buffers )
 {
     int ret=0;
@@ -125,6 +129,7 @@ static int setup_output_dmabuf(nvmpictx *ctx, uint32_t num_buffers )
         cParams.height = ctx->height;
         cParams.layout = NVBUF_LAYOUT_PITCH;
         
+        /*
         switch (ctx->cs)
         {
             case V4L2_COLORSPACE_REC709:
@@ -169,6 +174,7 @@ static int setup_output_dmabuf(nvmpictx *ctx, uint32_t num_buffers )
                 cParams.colorFormat = NVBUF_COLOR_FORMAT_NV12_10LE;
             }
         }
+        */
         
         cParams.colorFormat = NVBUF_COLOR_FORMAT_YUV420;
         cParams.memtag = NvBufSurfaceTag_VIDEO_ENC;
@@ -184,8 +190,7 @@ static int setup_output_dmabuf(nvmpictx *ctx, uint32_t num_buffers )
     }
     return ret;
 }
-*/
-
+#endif
 
 nvmpictx* nvmpi_create_encoder(nvEncParam* param)
 {
@@ -206,6 +211,9 @@ nvmpictx* nvmpi_create_encoder(nvEncParam* param)
 	ctx->pktPool = new NVMPI_bufPool<nvPacket*>();
 	ctx->enable_extended_colorformat=false;
 	ctx->packets_num=param->capture_num;
+#if (OUTPLANE_MEMTYPE == OUTPLANE_MEMTYPE_DMA)
+	ctx->output_plane_fd = new int[ctx->packets_num];
+#endif
 	ctx->qmax=param->qmax;
 	ctx->qmin=param->qmin;
 	ctx->num_b_frames=param->max_b_frames;
@@ -443,8 +451,11 @@ nvmpictx* nvmpi_create_encoder(nvEncParam* param)
 	TEST_ERROR(ret < 0, "Could not set framerate", ret);
 	
 	//ret = ctx->enc->output_plane.setupPlane(V4L2_MEMORY_USERPTR, ctx->packets_num, false, true);
+#if (OUTPLANE_MEMTYPE == OUTPLANE_MEMTYPE_MMAP)
 	ret = ctx->enc->output_plane.setupPlane(V4L2_MEMORY_MMAP, ctx->packets_num, true, false);
-	//ret = setup_output_dmabuf(ctx,ctx->packets_num);
+#else
+	ret = setup_output_dmabuf(ctx,ctx->packets_num); //V4L2_MEMORY_DMABUF
+#endif
 	TEST_ERROR(ret < 0, "Could not setup output plane", ret);
 
 	ret = ctx->enc->capture_plane.setupPlane(V4L2_MEMORY_MMAP, ctx->packets_num, true, false);
@@ -541,7 +552,7 @@ int nvmpi_encoder_put_frame(nvmpictx* ctx,nvFrame* frame)
 		v4l2_buf.index = ctx->index;
 		ctx->index++;
 		
-		/*
+#if (OUTPLANE_MEMTYPE == OUTPLANE_MEMTYPE_DMA)
 		v4l2_buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
 		v4l2_buf.memory = V4L2_MEMORY_DMABUF;
 		// Map output plane buffer for memory type DMABUF.
@@ -550,7 +561,7 @@ int nvmpi_encoder_put_frame(nvmpictx* ctx,nvFrame* frame)
 		{
 			cerr << "Error while mapping buffer at output plane" << endl;
 		}
-		*/
+#endif
 	}
 	else
 	{
@@ -604,12 +615,14 @@ int nvmpi_encoder_put_frame(nvmpictx* ctx,nvFrame* frame)
 		}
 #endif
 	}
-	/* //for V4L2_MEMORY_DMABUF only
-	for (uint32_t j = 0 ; j < nvBuffer->n_planes ; j++)
+	
+	//for V4L2_MEMORY_DMABUF only
+#if (OUTPLANE_MEMTYPE == OUTPLANE_MEMTYPE_DMA)
+	for (uint32_t j = 0; j < nvBuffer->n_planes; j++)
 	{
 		v4l2_buf.m.planes[j].bytesused = nvBuffer->planes[j].bytesused;
 	}
-	*/
+#endif
 
 	ret = ctx->enc->output_plane.qBuffer(v4l2_buf, NULL);
 	TEST_ERROR(ret < 0, "Error while queueing buffer at output plane", ret);
@@ -664,9 +677,10 @@ int nvmpi_encoder_close(nvmpictx* ctx)
 		//sem_destroy(&ctx.pollthread_sema);
 		//sem_destroy(&ctx.encoderthread_sema);
 	}
-	/*
+	
+#if (OUTPLANE_MEMTYPE == OUTPLANE_MEMTYPE_DMA)	
 	int ret;
-    //if(ctx.output_memory_type == V4L2_MEMORY_DMABUF && ctx.enc)
+    if(ctx->enc)
     {
         for (uint32_t i = 0; i < ctx->enc->output_plane.getNumBuffers(); i++)
         {
@@ -686,7 +700,8 @@ int nvmpi_encoder_close(nvmpictx* ctx)
             }
         }
     }
-    */
+    delete[] ctx->output_plane_fd;
+    #endif
 	
 	delete ctx->enc;
 	delete ctx->pktPool;

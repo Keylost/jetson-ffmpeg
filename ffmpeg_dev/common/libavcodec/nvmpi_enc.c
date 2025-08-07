@@ -20,6 +20,8 @@
 #include "codec_internal.h"
 #endif
 
+static const AVRational NVENC_TIMEBASE = {1, 1000000};
+
 #define OPT_packet_pool_size_MIN 1
 #define OPT_packet_pool_size_MAX 32
 #define OPT_packet_pool_size_DEFAULT 5
@@ -300,7 +302,9 @@ static int ff_nvmpi_send_frame(AVCodecContext *avctx,const AVFrame *frame)
 		_nvframe.linesize[1]=frame->linesize[1];
 		_nvframe.linesize[2]=frame->linesize[2];
 
-		_nvframe.timestamp=frame->pts;
+		//_nvframe.timestamp=frame->pts;
+		_nvframe.timestamp=av_rescale_q(frame->pts, avctx->time_base, NVENC_TIMEBASE);
+		//_nvframe.timestamp=frame->pts*avctx->time_base.num*1000*1000/avctx->time_base.den;
 
 		res=nvmpi_encoder_put_frame(nvmpi_context->ctx,&_nvframe);
 
@@ -332,7 +336,8 @@ static int ff_nvmpi_receive_packet(AVCodecContext *avctx, AVPacket *pkt)
 	}
 	
 	aPkt = (AVPacket*)(nPkt->privData);
-	aPkt->dts=aPkt->pts=nPkt->pts;
+	//aPkt->dts=aPkt->pts=nPkt->pts;
+	aPkt->dts = aPkt->pts = av_rescale_q(nPkt->pts, NVENC_TIMEBASE, avctx->time_base);
 	av_shrink_packet(aPkt, nPkt->payload_size);
 	if(nPkt->flags& AV_PKT_FLAG_KEY) aPkt->flags = AV_PKT_FLAG_KEY;
 	av_packet_move_ref(pkt, aPkt);
