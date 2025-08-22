@@ -180,8 +180,8 @@ static av_cold int nvmpi_encode_init(AVCodecContext *avctx)
 
 	}
 
-	//TODO should replace it
-	if ((avctx->flags & AV_CODEC_FLAG_GLOBAL_HEADER) && (avctx->codec->id == AV_CODEC_ID_H264))
+	//TODO should replace it. must gen extradata directly without calling for encoder
+	if ((avctx->flags & AV_CODEC_FLAG_GLOBAL_HEADER) && (avctx->codec->id == AV_CODEC_ID_H264 || avctx->codec->id == AV_CODEC_ID_H265))
 	{
 		uint8_t *dst[4];
 		int linesize[4];
@@ -190,7 +190,9 @@ static av_cold int nvmpi_encode_init(AVCodecContext *avctx)
 		nvmpictx *_ctx;
 		int i;
 		int ret;
-		param.codingType = NV_VIDEO_CodingH264;
+		int64_t shiftPts = 1000000/param.fps_n;
+		if(avctx->codec->id == AV_CODEC_ID_H264) param.codingType = NV_VIDEO_CodingH264;
+		else param.codingType = NV_VIDEO_CodingHEVC;
 		av_image_alloc(dst, linesize,avctx->width,avctx->height,avctx->pix_fmt,1);
 
 		nvmpi_context->ctx = nvmpi_create_encoder(&param);
@@ -198,6 +200,7 @@ static av_cold int nvmpi_encode_init(AVCodecContext *avctx)
 		//TODO error handling. if(!_ctx)
 		nvmpienc_initPktPool(avctx,nvmpi_context->packet_pool_size);
 		i=0;
+		_nvframe.timestamp=0;
 
 		while(true)
 		{
@@ -207,6 +210,10 @@ static av_cold int nvmpi_encode_init(AVCodecContext *avctx)
 			_nvframe.payload_size[0]=linesize[0]*avctx->height;
 			_nvframe.payload_size[1]=linesize[1]*avctx->height/2;
 			_nvframe.payload_size[2]=linesize[2]*avctx->height/2;
+			_nvframe.linesize[0]=linesize[0];
+			_nvframe.linesize[1]=linesize[1];
+			_nvframe.linesize[2]=linesize[2];
+			_nvframe.timestamp+=shiftPts;
 
 			nvmpi_encoder_put_frame(_ctx,&_nvframe);
 
@@ -215,9 +222,23 @@ static av_cold int nvmpi_encode_init(AVCodecContext *avctx)
 			if(ret<0)
 				continue;
 
-			//find idr index 0x0000000165
-			while((nPkt->payload[i]!=0||nPkt->payload[i+1]!=0||nPkt->payload[i+2]!=0||nPkt->payload[i+3]!=0x01||nPkt->payload[i+4]!=0x65))
+			//find idr index
+			while(i<nPkt->payload_size)
 			{
+				//check if nal start code
+				if(nPkt->payload[i] == 0 && nPkt->payload[i+1] == 0 && nPkt->payload[i+2] == 0 && nPkt->payload[i+3] == 0x01)
+				{
+					if(param.codingType == NV_VIDEO_CodingH264)
+					{
+						//h264 idr
+						if(nPkt->payload[i+4] == 0x65) break;
+					}
+					else // NV_VIDEO_CodingHEVC:
+					{
+						//h265 idr
+						if(nPkt->payload[i+4] == 0x26 || nPkt->payload[i+4] == 0x28) break;
+					}
+				}
 				i++;
 			}
 
