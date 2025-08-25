@@ -35,7 +35,7 @@ This library provides the ability to use hardware acceleration for video encodin
 
 ### FFmpeg support list
 
-  - The library is currently compatible with all FFmpeg versions from 4.2 to 7.1+.
+  - The library is currently compatible with all FFmpeg versions from 4.2 to 8.0+.
   - It may also work with versions older than 4.2, but it has not been tested.
 
 ### Supports Decoding
