@@ -67,49 +67,67 @@ cp "$FF_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC"
 function path_ff_configure ()
 {
 #add nvmpi to ffmpeg configure show_help() function.
-cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
-sed -i '/--disable-videotoolbox/a \ \ --enable-nvmpi           enable nvmpi code [no]' "$BKP_FILE_CONFIGURE"
-if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+if ! grep -q -- '--enable-nvmpi           enable nvmpi code \[no\]' "$BKP_FILE_CONFIGURE"; then
+	cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
+	sed -i '/--disable-videotoolbox/a \ \ --enable-nvmpi           enable nvmpi code [no]' "$BKP_FILE_CONFIGURE"
+	if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+fi
 
 #add nvmpi to ffmpeg configure HWACCEL_LIBRARY_LIST.
-cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
-sed -i '/HWACCEL_LIBRARY_LIST="/a \ \ \ \ nvmpi' "$BKP_FILE_CONFIGURE"
-if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+if ! sed -n '/HWACCEL_LIBRARY_LIST="/,/^"/p' "$BKP_FILE_CONFIGURE" | grep -qx '[[:space:]]*nvmpi'; then
+	cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
+	sed -i '/HWACCEL_LIBRARY_LIST="/a \ \ \ \ nvmpi' "$BKP_FILE_CONFIGURE"
+	if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+fi
 
 #add nvmpi avc/h264 deps. insert before h264_nvenc_encoder_deps="nvenc"
-cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
-sed -i '/h264_nvenc_encoder_deps="nvenc"/i h264_nvmpi_encoder_deps="nvmpi"\nh264_nvmpi_decoder_deps="nvmpi"\nh264_nvmpi_decoder_select="h264_mp4toannexb_bsf"' "$BKP_FILE_CONFIGURE"
-if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+if ! grep -q 'h264_nvmpi_encoder_deps' "$BKP_FILE_CONFIGURE"; then
+	cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
+	sed -i '/h264_nvenc_encoder_deps="nvenc"/i h264_nvmpi_encoder_deps="nvmpi"\nh264_nvmpi_decoder_deps="nvmpi"\nh264_nvmpi_decoder_select="h264_mp4toannexb_bsf"' "$BKP_FILE_CONFIGURE"
+	if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+fi
 
 #add nvmpi hevc/h265 deps. insert before hevc_nvenc_encoder_deps="nvenc"
-cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
-sed -i '/hevc_nvenc_encoder_deps="nvenc"/i hevc_nvmpi_encoder_deps="nvmpi"\nhevc_nvmpi_decoder_deps="nvmpi"\nhevc_nvmpi_decoder_select="hevc_mp4toannexb_bsf"' "$BKP_FILE_CONFIGURE"
-if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+if ! grep -q 'hevc_nvmpi_encoder_deps' "$BKP_FILE_CONFIGURE"; then
+	cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
+	sed -i '/hevc_nvenc_encoder_deps="nvenc"/i hevc_nvmpi_encoder_deps="nvmpi"\nhevc_nvmpi_decoder_deps="nvmpi"\nhevc_nvmpi_decoder_select="hevc_mp4toannexb_bsf"' "$BKP_FILE_CONFIGURE"
+	if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+fi
 
 #add nvmpi mpeg2 deps. insert after mpeg2_cuvid_decoder_deps="cuvid"
-cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
-sed -i '/mpeg2_cuvid_decoder_deps="cuvid"/a mpeg2_nvmpi_decoder_deps="nvmpi"' "$BKP_FILE_CONFIGURE"
-if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+if ! grep -q 'mpeg2_nvmpi_decoder_deps' "$BKP_FILE_CONFIGURE"; then
+	cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
+	sed -i '/mpeg2_cuvid_decoder_deps="cuvid"/a mpeg2_nvmpi_decoder_deps="nvmpi"' "$BKP_FILE_CONFIGURE"
+	if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+fi
 
 #add nvmpi mpeg4 deps. insert after mpeg4_cuvid_decoder_deps="cuvid"
-cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
-sed -i '/mpeg4_cuvid_decoder_deps="cuvid"/a mpeg4_nvmpi_decoder_deps="nvmpi"' "$BKP_FILE_CONFIGURE"
-if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+if ! grep -q 'mpeg4_nvmpi_decoder_deps' "$BKP_FILE_CONFIGURE"; then
+	cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
+	sed -i '/mpeg4_cuvid_decoder_deps="cuvid"/a mpeg4_nvmpi_decoder_deps="nvmpi"' "$BKP_FILE_CONFIGURE"
+	if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+fi
 
 #add nvmpi vp8 deps. insert after vp8_cuvid_decoder_deps="cuvid"
-cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
-sed -i '/vp8_cuvid_decoder_deps="cuvid"/a vp8_nvmpi_decoder_deps="nvmpi"' "$BKP_FILE_CONFIGURE"
-if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+if ! grep -q 'vp8_nvmpi_decoder_deps' "$BKP_FILE_CONFIGURE"; then
+	cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
+	sed -i '/vp8_cuvid_decoder_deps="cuvid"/a vp8_nvmpi_decoder_deps="nvmpi"' "$BKP_FILE_CONFIGURE"
+	if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+fi
 
-#add nvmpi vp8 deps. insert after vp9_cuvid_decoder_deps="cuvid"
-cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
-sed -i '/vp9_cuvid_decoder_deps="cuvid"/a vp9_nvmpi_decoder_deps="nvmpi"' "$BKP_FILE_CONFIGURE"
-if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+#add nvmpi vp9 deps. insert after vp9_cuvid_decoder_deps="cuvid"
+if ! grep -q 'vp9_nvmpi_decoder_deps' "$BKP_FILE_CONFIGURE"; then
+	cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
+	sed -i '/vp9_cuvid_decoder_deps="cuvid"/a vp9_nvmpi_decoder_deps="nvmpi"' "$BKP_FILE_CONFIGURE"
+	if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+fi
 
 #insert before enabled libx264 line.
-cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
-sed -i '/enabled libx264/i enabled nvmpi		  && require_pkg_config nvmpi nvmpi nvmpi.h nvmpi_create_decoder' "$BKP_FILE_CONFIGURE"
-if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+if ! grep -q 'enabled nvmpi' "$BKP_FILE_CONFIGURE"; then
+	cp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"
+	sed -i '/enabled libx264/i enabled nvmpi		  && require_pkg_config nvmpi nvmpi nvmpi.h nvmpi_create_decoder' "$BKP_FILE_CONFIGURE"
+	if cmp "$BKP_FILE_CONFIGURE" "$BKP_FILE_CONFIGURE.1"; then return 1; fi;
+fi
 
 return 0;
 }
@@ -119,34 +137,46 @@ return 0;
 function path_ff_libavcodec_Makefile ()
 {
 #add nvmpi avc/h264 encoder and decoder
-cp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"
-sed -i '/OBJS-\$(CONFIG_H264_NVENC_ENCODER)/i OBJS-\$(CONFIG_H264_NVMPI_DECODER)      += nvmpi_dec.o\nOBJS-$(CONFIG_H264_NVMPI_ENCODER)      += nvmpi_enc.o' "$BKP_FILE_LIBAVCODEC_MAKEFILE"
-if cmp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"; then return 1; fi;
+if ! grep -q 'CONFIG_H264_NVMPI_DECODER' "$BKP_FILE_LIBAVCODEC_MAKEFILE"; then
+	cp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"
+	sed -i '/OBJS-\$(CONFIG_H264_NVENC_ENCODER)/i OBJS-\$(CONFIG_H264_NVMPI_DECODER)      += nvmpi_dec.o\nOBJS-$(CONFIG_H264_NVMPI_ENCODER)      += nvmpi_enc.o' "$BKP_FILE_LIBAVCODEC_MAKEFILE"
+	if cmp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"; then return 1; fi;
+fi
 
 #add nvmpi hevc/h265 encoder and decoder
-cp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"
-sed -i '/OBJS-\$(CONFIG_HEVC_NVENC_ENCODER)/i OBJS-\$(CONFIG_HEVC_NVMPI_DECODER)      += nvmpi_dec.o\nOBJS-$(CONFIG_HEVC_NVMPI_ENCODER)      += nvmpi_enc.o' "$BKP_FILE_LIBAVCODEC_MAKEFILE"
-if cmp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"; then return 1; fi;
+if ! grep -q 'CONFIG_HEVC_NVMPI_DECODER' "$BKP_FILE_LIBAVCODEC_MAKEFILE"; then
+	cp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"
+	sed -i '/OBJS-\$(CONFIG_HEVC_NVENC_ENCODER)/i OBJS-\$(CONFIG_HEVC_NVMPI_DECODER)      += nvmpi_dec.o\nOBJS-$(CONFIG_HEVC_NVMPI_ENCODER)      += nvmpi_enc.o' "$BKP_FILE_LIBAVCODEC_MAKEFILE"
+	if cmp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"; then return 1; fi;
+fi
 
 #add nvmpi mpeg2 encoder and decoder
-cp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"
-sed -i '/OBJS-\$(CONFIG_MPEG2_CUVID_DECODER)/i OBJS-\$(CONFIG_MPEG2_NVMPI_DECODER)      += nvmpi_dec.o' "$BKP_FILE_LIBAVCODEC_MAKEFILE"
-if cmp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"; then return 1; fi;
+if ! grep -q 'CONFIG_MPEG2_NVMPI_DECODER' "$BKP_FILE_LIBAVCODEC_MAKEFILE"; then
+	cp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"
+	sed -i '/OBJS-\$(CONFIG_MPEG2_CUVID_DECODER)/i OBJS-\$(CONFIG_MPEG2_NVMPI_DECODER)      += nvmpi_dec.o' "$BKP_FILE_LIBAVCODEC_MAKEFILE"
+	if cmp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"; then return 1; fi;
+fi
 
 #add nvmpi mpeg4 encoder and decoder
-cp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"
-sed -i '/OBJS-\$(CONFIG_MPEG4_CUVID_DECODER)/i OBJS-\$(CONFIG_MPEG4_NVMPI_DECODER)      += nvmpi_dec.o' "$BKP_FILE_LIBAVCODEC_MAKEFILE"
-if cmp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"; then return 1; fi;
+if ! grep -q 'CONFIG_MPEG4_NVMPI_DECODER' "$BKP_FILE_LIBAVCODEC_MAKEFILE"; then
+	cp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"
+	sed -i '/OBJS-\$(CONFIG_MPEG4_CUVID_DECODER)/i OBJS-\$(CONFIG_MPEG4_NVMPI_DECODER)      += nvmpi_dec.o' "$BKP_FILE_LIBAVCODEC_MAKEFILE"
+	if cmp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"; then return 1; fi;
+fi
 
 #add nvmpi vp8 encoder and decoder
-cp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"
-sed -i '/OBJS-\$(CONFIG_VP8_CUVID_DECODER)/i OBJS-\$(CONFIG_VP8_NVMPI_DECODER)      += nvmpi_dec.o' "$BKP_FILE_LIBAVCODEC_MAKEFILE"
-if cmp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"; then return 1; fi;
+if ! grep -q 'CONFIG_VP8_NVMPI_DECODER' "$BKP_FILE_LIBAVCODEC_MAKEFILE"; then
+	cp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"
+	sed -i '/OBJS-\$(CONFIG_VP8_CUVID_DECODER)/i OBJS-\$(CONFIG_VP8_NVMPI_DECODER)      += nvmpi_dec.o' "$BKP_FILE_LIBAVCODEC_MAKEFILE"
+	if cmp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"; then return 1; fi;
+fi
 
 #add nvmpi vp9 encoder and decoder
-cp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"
-sed -i '/OBJS-\$(CONFIG_VP9_CUVID_DECODER)/i OBJS-\$(CONFIG_VP9_NVMPI_DECODER)      += nvmpi_dec.o' "$BKP_FILE_LIBAVCODEC_MAKEFILE"
-if cmp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"; then return 1; fi;
+if ! grep -q 'CONFIG_VP9_NVMPI_DECODER' "$BKP_FILE_LIBAVCODEC_MAKEFILE"; then
+	cp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"
+	sed -i '/OBJS-\$(CONFIG_VP9_CUVID_DECODER)/i OBJS-\$(CONFIG_VP9_NVMPI_DECODER)      += nvmpi_dec.o' "$BKP_FILE_LIBAVCODEC_MAKEFILE"
+	if cmp "$BKP_FILE_LIBAVCODEC_MAKEFILE" "$BKP_FILE_LIBAVCODEC_MAKEFILE.1"; then return 1; fi;
+fi
 
 return 0;
 }
@@ -161,34 +191,46 @@ if [ "$FF_LIBAVCODEC_VERSION_MAJOR" -gt 59 ]; then
 fi
 
 #add nvmpi avc/h264 encoder and decoder
-cp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"
-sed -i "/$FF_CODEC_INTERFACE ff_h264_decoder;/a $FF_CODEC_INTERFACE ff_h264_nvmpi_decoder;\n$FF_CODEC_INTERFACE ff_h264_nvmpi_encoder;" "$BKP_FILE_LIBAVCODEC_ALLCODECSC"
-if cmp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"; then return 1; fi;
+if ! grep -q 'ff_h264_nvmpi_decoder' "$BKP_FILE_LIBAVCODEC_ALLCODECSC"; then
+	cp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"
+	sed -i "/$FF_CODEC_INTERFACE ff_h264_decoder;/a $FF_CODEC_INTERFACE ff_h264_nvmpi_decoder;\n$FF_CODEC_INTERFACE ff_h264_nvmpi_encoder;" "$BKP_FILE_LIBAVCODEC_ALLCODECSC"
+	if cmp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"; then return 1; fi;
+fi
 
 #add nvmpi hevc/h265 encoder and decoder
-cp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"
-sed -i "/$FF_CODEC_INTERFACE ff_hevc_decoder;/a $FF_CODEC_INTERFACE ff_hevc_nvmpi_decoder;\n$FF_CODEC_INTERFACE ff_hevc_nvmpi_encoder;" "$BKP_FILE_LIBAVCODEC_ALLCODECSC"
-if cmp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"; then return 1; fi;
+if ! grep -q 'ff_hevc_nvmpi_decoder' "$BKP_FILE_LIBAVCODEC_ALLCODECSC"; then
+	cp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"
+	sed -i "/$FF_CODEC_INTERFACE ff_hevc_decoder;/a $FF_CODEC_INTERFACE ff_hevc_nvmpi_decoder;\n$FF_CODEC_INTERFACE ff_hevc_nvmpi_encoder;" "$BKP_FILE_LIBAVCODEC_ALLCODECSC"
+	if cmp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"; then return 1; fi;
+fi
 
 #add nvmpi mpeg2 encoder and decoder
-cp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"
-sed -i "/$FF_CODEC_INTERFACE ff_mpeg2video_decoder;/a $FF_CODEC_INTERFACE ff_mpeg2_nvmpi_decoder;" "$BKP_FILE_LIBAVCODEC_ALLCODECSC"
-if cmp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"; then return 1; fi;
+if ! grep -q 'ff_mpeg2_nvmpi_decoder' "$BKP_FILE_LIBAVCODEC_ALLCODECSC"; then
+	cp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"
+	sed -i "/$FF_CODEC_INTERFACE ff_mpeg2video_decoder;/a $FF_CODEC_INTERFACE ff_mpeg2_nvmpi_decoder;" "$BKP_FILE_LIBAVCODEC_ALLCODECSC"
+	if cmp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"; then return 1; fi;
+fi
 
 #add nvmpi mpeg4 encoder and decoder
-cp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"
-sed -i "/$FF_CODEC_INTERFACE ff_mpeg4_decoder;/a $FF_CODEC_INTERFACE ff_mpeg4_nvmpi_decoder;" "$BKP_FILE_LIBAVCODEC_ALLCODECSC"
-if cmp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"; then return 1; fi;
+if ! grep -q 'ff_mpeg4_nvmpi_decoder' "$BKP_FILE_LIBAVCODEC_ALLCODECSC"; then
+	cp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"
+	sed -i "/$FF_CODEC_INTERFACE ff_mpeg4_decoder;/a $FF_CODEC_INTERFACE ff_mpeg4_nvmpi_decoder;" "$BKP_FILE_LIBAVCODEC_ALLCODECSC"
+	if cmp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"; then return 1; fi;
+fi
 
 #add nvmpi vp8 encoder and decoder
-cp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"
-sed -i "/$FF_CODEC_INTERFACE ff_vp8_decoder;/a $FF_CODEC_INTERFACE ff_vp8_nvmpi_decoder;" "$BKP_FILE_LIBAVCODEC_ALLCODECSC"
-if cmp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"; then return 1; fi;
+if ! grep -q 'ff_vp8_nvmpi_decoder' "$BKP_FILE_LIBAVCODEC_ALLCODECSC"; then
+	cp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"
+	sed -i "/$FF_CODEC_INTERFACE ff_vp8_decoder;/a $FF_CODEC_INTERFACE ff_vp8_nvmpi_decoder;" "$BKP_FILE_LIBAVCODEC_ALLCODECSC"
+	if cmp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"; then return 1; fi;
+fi
 
 #add nvmpi vp9 encoder and decoder
-cp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"
-sed -i "/$FF_CODEC_INTERFACE ff_vp9_decoder;/a $FF_CODEC_INTERFACE ff_vp9_nvmpi_decoder;" "$BKP_FILE_LIBAVCODEC_ALLCODECSC"
-if cmp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"; then return 1; fi;
+if ! grep -q 'ff_vp9_nvmpi_decoder' "$BKP_FILE_LIBAVCODEC_ALLCODECSC"; then
+	cp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"
+	sed -i "/$FF_CODEC_INTERFACE ff_vp9_decoder;/a $FF_CODEC_INTERFACE ff_vp9_nvmpi_decoder;" "$BKP_FILE_LIBAVCODEC_ALLCODECSC"
+	if cmp "$BKP_FILE_LIBAVCODEC_ALLCODECSC" "$BKP_FILE_LIBAVCODEC_ALLCODECSC.1"; then return 1; fi;
+fi
 
 return 0;
 }
