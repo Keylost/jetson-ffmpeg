@@ -1,0 +1,450 @@
+===============================================================================
+Argus Camera API Release Notes
+===============================================================================
+
+-------------------------------------------------------------------------------
+Release 0.98 (06/23/2021)
+-------------------------------------------------------------------------------
+NEW FEATURES:
+* Ext::BlockingSessionCameraProvider extension
+     - Provides a method to create a blocking capture session.
+     - IBlockingSessionCameraProvider::createBlockingCaptureSession() creates
+       and returns a blocking CaptureSession using the given device.
+
+* Ext::DebugCaptureSession extension
+     - Provides a method to dump internal argus library runtime information.
+     - IDebugCaptureSession::dump() returns session runtime information to
+       the specified file descriptor.
+     - IDebugCaptureSession::setEventInjectionErrorMsg() sets event injection
+       error id.
+
+* Ext::InternalFrameCount extension
+     - Provides accessors for an internal frame count performance metric.
+     - Provides internal capture information in the form of an
+       "internal frame count", which is the total number of captures
+       submitted by the session including both the internal captures
+       as well as client-submitted requests.
+     - IInternalFrameCount::getInternalFrameCount() returns the internal frame
+       count for the request.
+
+* Ext::SensorEepromData extension
+     - Provides an interface to get EEPROM data.
+     - ISensorEepromData::getSensorEepromDataSize() returns the size of the
+       EEPROM data.
+     - ISensorEepromData::getSensorEepromData()] copies back the EEPROM data
+       to the provided memory location. The maximum supported size of the
+       EEPROM data that can be read is 1024.
+
+* Ext::SensorOtpData extension
+     - Provides an interface to get OTP data.
+     - ISensorOtpData::getSensorOtpDataSize() returns the size of the
+       OTP data.
+     - ISensorOtpData::getSensorOtpData()] copies back the OTP data
+       to the provided memory location. The maximum supported size of the
+       OTP data that can be read is 512.
+
+* Ext::SensorPrivateMetadata extension
+     - Provides accessors for sensor embedded metadata through different
+       interfaces mentioned below. This data is metadata that the sensor embeds
+       inside the frame, the type and formatting of which depends on the sensor.
+     - ISensorPrivateMetadataCaps::getMetadataSize() returns the size in bytes
+       of the private metadata.
+     - ISensorPrivateMetadataRequest::setMetadataEnable() enables the sensor
+       private metadata, will only work if the sensor supports embedded metadata.
+     - ISensorPrivateMetadataRequest::getMetadataEnable() returns if the
+       metadata is enabled for this request.
+     - ISensorPrivateMetadata::getMetadataSize() returns the size of the
+       embedded metadata.
+     - ISensorPrivateMetadata::getMetaData() copies back the metadata to
+       the provided memory location.
+
+* Ext::SensorPrivateMetadataClientBuffer extension
+     - Provides accessors for set client buffer for sensor embedded metadata.
+     - ISensorPrivateMetadataClientBufferRequest::setClientMetadataBuffer()
+       client allocates the metadata buffer and sets the address of the buffer,
+       Argus writes the sensor metadata directly to it. Only supported in
+       single process mode.
+     - ISensorPrivateMetadataClientBufferRequest::getClientMetadataBufferEnable()
+       returns if client metadata buffer is used for this request.
+
+* Ext::SensorTimestampTsc extension
+     - Provides a timestamp interface to get tegra wide timestamp system counter
+       (TSC) HW timestamp.
+     - ISensorTimestampTsc::getSensorSofTimestampTsc() returns the VI HW
+       start of frame (SOF) timestamp based on tegra wide timestamp system
+       counter (TSC). This is the start timestamp for the sensor (in nanoseconds).
+     - ISensorTimestampTsc::getSensorEofTimestampTsc() returns the VI HW
+       end of frame (EOF) timestamp based on tegra wide timestamp system
+       counter (TSC). This is the end timestamp for the sensor (in nanoseconds).
+
+* Ext::SyncSensorCalibrationData extension
+     - Provides access to synchronized sensor calibration data.
+     - ISyncSensorCalibrationData::getSyncSensorModuleId() returns the
+       sync sensor module id in the provided memory location.
+       The maximum supported length of sync sensor id string is 32.
+     - ISyncSensorCalibrationData::getImageSizeInPixels() returns the size of
+       the image in pixels.
+     - ISyncSensorCalibrationData::getFocalLength()] returns the focal length
+       fx and fy from intrinsic parameters.
+     - ISyncSensorCalibrationData::getSkew() returns the skew from intrinsic
+       parameters.
+     - ISyncSensorCalibrationData::getPrincipalPoint() returns the principal
+       point (optical center) x and y from intrinsic parameters.
+     - ISyncSensorCalibrationData::getLensDistortionType() returns the lens
+       distortion type as per the model being used.
+     - ISyncSensorCalibrationData::getFisheyeMappingType() returns the mapping
+       type in case of fisheye distortion.
+     - ISyncSensorCalibrationData::getRadialCoeffsCount() returns the radial
+       coefficients count in case of polynomial or fisheye distortion.
+     - ISyncSensorCalibrationData::getRadialCoeffs() returns the radial
+       coefficients vector as per distortion type and size of the vector is
+       given by getRadialCoeffsCount().
+     - ISyncSensorCalibrationData::getTangentialCoeffsCount() returns the
+       tangential coefficients count in case of polynomial distortion.
+     - ISyncSensorCalibrationData::getTangentialCoeffs() returns the tangential
+       coefficients in case of polynomial distortion and size of the vector is
+       given by getTangentialCoeffsCount().
+     - ISyncSensorCalibrationData::getRotationParams() returns the rotation
+       parameter expressed in Rodrigues notation from extrinsic parameters.
+     - ISyncSensorCalibrationData::getTranslationParams() returns the
+       translation parameters in x, y and z co-ordinates with respect to a
+       reference point from extrinsic parameters.
+     - ISyncSensorCalibrationData::isImuSensorAvailable() returns whether
+       IMU sensor is present or not.
+     - ISyncSensorCalibrationData::getLinearAccBias() returns the linear
+       acceleration bias for all three axes x, y and z of the IMU device.
+     - ISyncSensorCalibrationData::getAngularVelocityBias() returns the angular
+       velocity bias for all three axes x, y and z of the IMU device.
+     - ISyncSensorCalibrationData::getGravityAcc() returns the gravity
+       acceleration for all three axes x, y and z of the IMU device.
+     - ISyncSensorCalibrationData::getImuRotationParams() returns the IMU
+       rotation parameter expressed in Rodrigues notation from extrinsic parameters.
+     - ISyncSensorCalibrationData::getImuTranslationParams() returns the IMU
+       translation parameters in x, y and z co-ordinates with respect to a
+       reference point from extrinsic parameters.
+
+CHANGES:
+* Argus is supported on all Jetson Linux platforms.
+
+* Point3D added as a new data type which provides coordinates of a
+  three-dimensional point.
+
+* SensorPlacement parameter added to ICameraProperties interface which gives
+  camera sensor placement position on the module.
+
+* isBufferFormatSupported parameter added to ISensorMode interface which
+  checks if the provided buffer is supported by camera device.
+
+* BayerHistogramRegion parameter added to IAutocontrolSettings interface which
+  gives Rectangle of the bayer histogram region of interest.
+
+* AfRegions parameter added to IAutocontrolSettings interface which gives
+  Image regions considered by the AF algorithm. An empty list (the default)
+  means to consider the entire image.
+
+* BayerHistogramRegion parameter added to ICaptureMetadata interface which
+  gives Rectangle of the bayer histogram region of interest.
+
+* FlickerState parameter added to ICaptureMetadata interface which gives
+  Flicker state of AE at the time of capture.
+
+* AfRegions parameter added to ICaptureMetadata interface which gives
+  Regions of interest used by the AF algorithm.
+
+* SharpnessScore parameter added to ICaptureMetadata interface which gives
+  Sharpness score values calculated for corresponding AF regions.
+
+-------------------------------------------------------------------------------
+Release 0.97 (08/10/2018)
+-------------------------------------------------------------------------------
+NEW FEATURES:
+* Application-managed Buffer Streams
+    - In addition to outputting capture results to an EGLStream, clients now
+      have the ability to output capture results directly to client-allocated
+      image buffers. Initial support is limited to the use of EGLImages and
+      EGLSync objects, and is provided through a number of new types and
+      interfaces:
+
+      StreamType
+          UUID type that defines the core type of the stream and defines which
+          interfaces the stream will support. Applications that continue to use
+          EGLStreams will use STREAM_TYPE_EGL (and must provide that as an
+          argument to ICaptureSession::createOutputStreamSettings), while the
+          new application-managed buffer streams support is provided with the
+          use of STREAM_TYPE_BUFFER.
+
+      BufferType
+          UUID type that defines the type of an application-managed Buffer
+          resource. In this release, the only BufferType that is supported is
+          BUFFER_TYPE_EGL_IMAGE, which specifies that Buffer objects will wrap
+          EGLImage resources.
+
+      SyncType
+          UUID type that defines the sync type of an application-managed Buffer
+          resource. The use of sync objects is optional, but they may be used to
+          optimize application pipelining by synchronizing Buffer data access
+          using hardware sync primitives. This allows Buffers to be output from
+          Argus before the capture is fully complete so that the application
+          may program its downstream pipeline earlier, reducing CPU threads and
+          latency. The only hardware SyncType supported in this release is
+          SYNC_TYPE_EGL_SYNC, which specifies that Buffer objects will use
+          EGLSync objects for synchronizing data access to the Buffer's image
+          store. Note that SYNC_TYPE_NONE is the default SyncType, which means
+          that hardware sync will not be used, and so Buffers will only be
+          passed between Argus and the client once all buffer access is
+          complete (ie. it will CPU wait for any data access before returning).
+
+      IBufferOutputStreamSettings
+          This is used to configure Buffer OutputStream creation, and is exposed
+          by OutputStreamSettings objects created using STREAM_TYPE_BUFFER.
+          This interface provides methods to set the BufferType and SyncType
+          that will be used with the new stream.
+
+      IBufferOutputStream
+          This is the primary interface for application-managed buffer
+          OutputStreams (STREAM_TYPE_BUFFER). It provides methods for
+          configuring and creating Buffer objects, as well as the acquire and
+          release and synchronization mechanisms required to pass those Buffers
+          between Argus and the client application.
+
+      BufferSettings
+          Provided by IBufferOutputStream, this object is used to configure the
+          creation of Buffer objects. The interfaces exposed by this object
+          depends on the BufferType of the OutputStream (which is currently
+          limited to BUFFER_TYPE_EGL_IMAGE and IEGLImageBufferSettings).
+
+      IEGLImageBufferSettings
+          This is used to set the EGLDisplay and EGLImage handles of the EGLImage
+          that will be wrapped by the new Buffer object.
+
+      Buffer
+          Created and owned by an OutputStream, these objects wrap application-
+          managed buffer resources and are used to synchronize data access to
+          the buffer resources between Argus and the client application. Buffers
+          are released to their stream to be used by Argus for a capture
+          request, and are acquired back when the capture is complete and the
+          client is ready to consume the output.
+
+      IBuffer
+          This provides the core features available for all BufferTypes,
+          including the ability to associate client pointers with a Buffer using
+          set/getClientData.
+
+      IEGLImageBuffer
+          Provides getters for the EGLImage resources that are being wrapped by
+          a Buffer having the BUFFER_TYPE_EGL_IMAGE type.
+
+      IEGLSync
+          When the SyncType is SYNC_TYPE_EGL_SYNC, this interface provides the
+          means to get or set EGLSync objects on the Buffer after acquiring the
+          Buffer or before releasing it for use with another capture request,
+          respectively.
+
+      Note that the use of application-managed buffers, including all of the
+      objects and interfaces above, are demonstrated by the new eglImage sample.
+
+* Ext::DolWdrSendorMode extension
+    - Adds extra functionalities for Digital Overlap (DOL) Wide Dynamic Range
+      (WDR) sensor modes.
+
+* EGLStream::IImageHeaderlessFile interface
+    - Provides a means to write acquired EGLStream::Images to headerless files
+      (ie. raw data dump).
+
+CHANGES:
+* StreamType parameter added to ICaptureSession:createOutputStreamSettings, and
+  IStream renamed to IEGLOutputStream
+    - Existing applications that use EGLStreams must use the new interface
+      name and pass STREAM_TYPE_EGL to createOutputStreamSettings to be
+      compatible with this release.
+
+* All VideoStabilization capabilities were removed.
+    - This feature was never fully supported, and the methods given to control
+      video stabilization were likely insufficient to support a proper
+      implementation in the future anyways. Thus, all video stabilization-
+      related components are being removed from the core API in favor of a
+      future extension (if video stabilization were to ever be added again).
+
+* Ext::FaceDetect extension support and sample were removed.
+    - NVIDIA does not offer face detection capabilities in this Argus release,
+      and so the face detection sample is being removed so as to not be
+      misleading to users (ie. providing a sample that does not actually work).
+      Since it's possible that face detection may be added again in another
+      release, the Ext::FaceDetect extension header has been left in place.
+
+* Added optional Rotation parameter to EGLStream::NV::ImageNativeBuffer.
+
+* Sample changes:
+    - CommonOptions added to sample utils to provide a more consistent set of
+      command-line parameters for all of the samples (including camera device,
+      sensor mode index, preview window rectangle, etc).
+    - NativeBuffer class added to utils to allocate native buffer objects that
+      may be used with Buffer OutputStreams. This NativeBuffer class wraps and
+      uses the NvBuffer API provided by the JetPack Multimedia APIs, and uses
+      the methods that API provides to create EGLImages from the NvBuffers for
+      use with Argus.
+
+* New samples:
+    eglImage - Demonstrates the use of the new application-managed buffer
+               support by creating a Buffer OutputStream from a set of EGLImages
+               given by the application and then making capture requests with
+               those Buffers. The results are then displayed by binding the
+               EGLImage to an OpenGL texture and then rendering on screen.
+               EGLSyncs are also used to increase the hardware pipelining
+               between Argus and OpenGL.
+
+    cudaBayerDemosaic - Demonstrates a pipelined application that chains two
+                        EGLStreams -- one between Argus and CUDA, and another
+                        between CUDA and OpenGL -- in order to consume a Bayer
+                        EGLStream with CUDA and (crudely) demosaic into another
+                        RGBA stream which is then rendered on screen by OpenGL.
+
+BUG FIXES:
+* N/A
+
+KNOWN ISSUES:
+* N/A
+
+ADDITIONAL NOTES:
+* N/A
+
+-------------------------------------------------------------------------------
+Release 0.96 (10/05/2016)
+-------------------------------------------------------------------------------
+NEW FEATURES:
+* Ext::BayerAverageMap - Provides pixel averages and clipping statistics.
+* Edge enhancement controls and metadata.
+* Saturation controls and metadata.
+* Improved denoise controls and metadata.
+* Improved white balance controls.
+* Per-stream post-processing enable.
+
+* New samples:
+    userAutoExposure     - Demonstrates manual exposure time and analog gain
+                           controls using a basic auto-exposure algorithm.
+    userAutoWhiteBalance - Demonstrates manual white balance controls.
+    denoise              - Uses two streams to render a side-by-side comparison
+                           of the effect of enabling denoise algorithms.
+    bayerAverageMap      - Uses the BayerAverageMap extension to visualize the
+                           average color and clipping statistics.
+
+CHANGES:
+* The multiprocess implementation is now used by default.
+* Various IStreamSettings controls moved into IRequest.
+* BayerTuple class replaces generic float[4] usage.
+* BayerSharpnessMap::getBinData returns the entire sharpness map instead of
+  requiring per-bin/per-channel calls.
+* ICaptureSession::stopRepeat() returns the range of capture IDs that were
+  submitted by the repeat[Burst]() call being stopped.
+
+BUG FIXES:
+* Gain ranges/values corrected.
+* Many stability and multiprocess fixes.
+
+KNOWN ISSUES:
+* N/A
+
+ADDITIONAL NOTES:
+* Various debug information and all Argus API errors will be output by the
+  nvargus-daemon service, which writes to syslog by default. The following may
+  be used to monitor this logging:
+    $ tail -f /var/log/syslog | grep argus
+* If an application crash/hang occurs, the nvargus-daemon service may be left in
+  a bad state, and the hardware may be unavailable for a short time afterwards.
+  When this occurs it is best to restart the nvargus-daemon service and wait for
+  about 15 seconds before attempting to run another application:
+    sudo service nvargus-daemon restart
+
+-------------------------------------------------------------------------------
+Release 0.95 (07/25/2016)
+-------------------------------------------------------------------------------
+NEW FEATURES:
+* Multi-process support. This adds an nvargus-daemon system service and
+  corresponding client-side library that applications link against in order to
+  enable multi-process support. Besides changing the Argus library being linked
+  against, no other application changes are required for multi-process support.
+
+  To link applications for multi-process use, replace the libnvargus.so library
+  name with libnvargus_socketclient.so. Alternatively, if using the CMake build
+  system with the sample applications, provide the optional MULTIPROCESS flag
+  during the makefile generation step:
+      'cmake -DMULTIPROCESS=ON ..'
+
+  Multiprocess applications require the nvargus-daemon service to be running.
+  This service runs automatically at boot time, though it remains uninitialized
+  until the first multi-process Argus application is launched.  Once the
+  service is initialized the daemon will lock the camera resources on the
+  device and single-process Argus applications will fail to operate.
+  The nvargus-daemon service can be controlled using the following:
+      'sudo service nvargus-daemon [stop|start|restart]'
+  Error logging from the daemon will be output to the syslog (/var/log/syslog)
+
+* Feature-rich camera application sample with full GUI support.
+  (Previously 'samples/camera', moved to 'apps/camera'.)
+
+* New samples:
+    gstVideoEncode - Encodes video through a GStreamer consumer.
+    multiStream    - Uses two OutputStreams for simultaneous still captures and
+                     preview from a single device.
+    multiSensor    - Opens two devices for simultaneous still captures from one
+                     device and preview from the other.
+    oneShot        - "Bare minimum" Argus app; takes a single snapshot.
+    syncSensor     - Computes the stereo disparity between two syncronized
+                     sensors.
+
+CHANGES:
+* EGLStream creation is now handled directly by Argus during OutputStream
+  creation instead of requring applications to first create an EGLStream before
+  connecting Argus.
+
+* Argus::EGLStream components (FrameConsumer, Frame, Image, etc.) moved out of
+  Argus to become its own API. It continues to use Argus types, and includes
+  functionality that interact directly with Argus (eg. Argus metadata support
+  and FrameConsumer creation from an OutputStream), but is otherwise independent
+  from Argus and can be used without an open CameraProvider. This API is still
+  contained in libnvargus.so, but is expected to be moved to its own library in a
+  future release.
+
+BUG FIXES:
+* Face detection and sample rendering orientation fixed.
+* All sensor modes are exposed (previously limited to one mode).
+
+KNOWN ISSUES:
+* Histogram stats only returning first 64 of 256 bins.
+* Instability with multi-sensor boards (eg. E3323).
+
+-------------------------------------------------------------------------------
+Release 0.91 (03/10/2016)
+-------------------------------------------------------------------------------
+NEW FEATURES:
+* Initial Argus release.
+
+NOTES:
+* As this is a beta release, the interfaces are not guaranteed to be
+immutable; they may not be compatible with interfaces of the same name
+from either previous or future releases.  Interface changes since the
+last release are listed in the "CHANGES" section below.
+
+* Current EGLStream Buffer Format Support:
+
+    Format                     State
+    =======================    ==========
+    PIXEL_FMT_Y8               Not Supported
+    PIXEL_FMT_Y16              Not Supported
+    PIXEL_FMT_YCbCr_420_888    Works with all consumers.
+    PIXEL_FMT_YCbCr_422_888    Not Supported
+    PIXEL_FMT_YCbCr_444_888    Not Supported
+    PIXEL_FMT_JPEG_BLOB        Not Supported (TODO: Remove format)
+    PIXEL_FMT_RAW16            Works with all consumers
+
+CHANGES:
+* N/A
+
+BUG FIXES:
+* N/A
+
+KNOWN ISSUES:
+* The face detection algorithm is not detecting the device orientation
+  correctly, and thus the input to the detection algorithm may be inverted
+  with respect to the sensor. If face detection does not appear to be working,
+  rotating the sensor 180 degrees may help.

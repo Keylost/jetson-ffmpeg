@@ -1,0 +1,330 @@
+name: "ResNet-10"
+input: "data"
+input_dim: 1
+input_dim: 3
+input_dim: 368
+input_dim: 640
+
+# Layer1_W (64, 3, 7, 7)
+
+layer {
+  name: "Layer1"
+  type: "Convolution"
+  bottom: "data"
+  top: "Layer1"
+  convolution_param {
+    stride: 2
+    pad: 3
+    kernel_size: 7
+    num_output: 64
+  }
+}
+
+layer {
+  name: "Layer1/relu"
+  type: "ReLU"
+  bottom: "Layer1"
+  top: "Layer1"
+}
+
+
+layer {
+	bottom: "Layer1"
+	top: "Layer2"
+	name: "Layer2"
+	type: "Pooling"
+	pooling_param {
+		kernel_size: 2
+		stride: 2
+		pool: MAX
+	}
+}
+
+# Layer3_block_0_W (56, 64, 3, 3)
+
+layer {
+	bottom: "Layer2"
+	top: "Layer3_block_0"
+	name: "Layer3_block_0"
+	type: "Convolution"
+	convolution_param {
+		num_output: 56
+		kernel_size: 3
+		pad: 1
+		stride: 1
+	}
+}
+
+layer {
+	bottom: "Layer3_block_0"
+	top: "Layer3_block_0"
+	name: "Layer3_block_0_relu"
+	type: "ReLU"
+}
+
+# Layer3_block_1_W (64, 56, 3, 3)
+
+layer {
+	bottom: "Layer3_block_0"
+	top: "Layer3_block_1"
+	name: "Layer3_block_1"
+	type: "Convolution"
+	convolution_param {
+		num_output: 64
+		kernel_size: 3
+		pad: 1
+		stride: 1
+	}
+}
+
+layer {
+	bottom: "Layer2"
+	bottom: "Layer3_block_1"
+	top: "Layer3"
+	name: "Layer3"
+	type: "Eltwise"
+}
+
+layer {
+	bottom: "Layer3"
+	top: "Layer3"
+	name: "Layer3_relu"
+	type: "ReLU"
+}
+
+# Layer4_block_0_W (88, 64, 3, 3)
+
+layer {
+	bottom: "Layer3"
+	top: "Layer4_block_0"
+	name: "Layer4_block_0"
+	type: "Convolution"
+	convolution_param {
+		num_output: 88
+		kernel_size: 3
+		pad: 1
+		stride: 2
+	}
+}
+
+layer {
+	bottom: "Layer4_block_0"
+	top: "Layer4_block_0"
+	name: "Layer4_block_0_relu"
+	type: "ReLU"
+}
+
+# Layer4_block_1_W (128, 88, 3, 3)
+layer {
+	bottom: "Layer4_block_0"
+	top: "Layer4_block_1"
+	name: "Layer4_block_1"
+	type: "Convolution"
+	convolution_param {
+		num_output: 128
+		kernel_size: 3
+		pad: 1
+		stride: 1
+	}
+}
+
+# Layer4_proj_block_W (128, 64, 1, 1)
+
+layer {
+	bottom: "Layer3"
+	top: "Layer4_proj_block"
+	name: "Layer4_proj_block"
+	type: "Convolution"
+	convolution_param {
+		num_output: 128
+		kernel_size: 1
+		pad: 0
+		stride: 2
+	}
+}
+
+layer {
+	bottom: "Layer4_proj_block"
+	bottom: "Layer4_block_1"
+	top: "Layer4"
+	name: "Layer4"
+	type: "Eltwise"
+}
+
+layer {
+	bottom: "Layer4"
+	top: "Layer4"
+	name: "Layer4_relu"
+	type: "ReLU"
+}
+
+# Layer5_block_0_W (112, 128, 3, 3)
+
+layer {
+	bottom: "Layer4"
+	top: "Layer5_block_0"
+	name: "Layer5_block_0"
+	type: "Convolution"
+	convolution_param {
+		num_output: 112
+		kernel_size: 3
+		pad: 1
+		stride: 2
+	}
+}
+
+layer {
+	bottom: "Layer5_block_0"
+	top: "Layer5_block_0"
+	name: "Layer5_block_0_relu"
+	type: "ReLU"
+}
+
+# Layer5_block_1_W (256, 112, 3, 3)
+
+layer {
+	bottom: "Layer5_block_0"
+	top: "Layer5_block_1"
+	name: "Layer5_block_1"
+	type: "Convolution"
+	convolution_param {
+		num_output: 256
+		kernel_size: 3
+		pad: 1
+		stride: 1
+	}
+}
+
+
+# Layer5_proj_block_W (256, 128, 1, 1)
+
+layer {
+	bottom: "Layer4"
+	top: "Layer5_proj_block"
+	name: "Layer5_proj_block"
+	type: "Convolution"
+	convolution_param {
+		num_output: 256
+		kernel_size: 1
+		pad: 0
+		stride: 2
+	}
+}
+
+layer {
+	bottom: "Layer5_proj_block"
+	bottom: "Layer5_block_1"
+	top: "Layer5"
+	name: "Layer5"
+	type: "Eltwise"
+}
+
+layer {
+	bottom: "Layer5"
+	top: "Layer5"
+	name: "Layer5_relu"
+	type: "ReLU"
+}
+
+# Layer6_block_0_W (96, 256, 3, 3)
+layer {
+	bottom: "Layer5"
+	top: "Layer6_block_0"
+	name: "Layer6_block_0"
+	type: "Convolution"
+	convolution_param {
+		num_output: 96
+		kernel_size: 3
+		pad: 1
+		stride: 1
+	}
+}
+
+layer {
+	bottom: "Layer6_block_0"
+	top: "Layer6_block_0"
+	name: "Layer6_block_0_relu"
+	type: "ReLU"
+}
+
+# Layer6_block_1_W (512, 96, 3, 3)
+
+layer {
+	bottom: "Layer6_block_0"
+	top: "Layer6_block_1"
+	name: "Layer6_block_1"
+	type: "Convolution"
+	convolution_param {
+		num_output: 512
+		kernel_size: 3
+		pad: 1
+		stride: 1
+	}
+}
+
+
+# Layer6_proj_block_W (512, 256, 1, 1)
+
+layer {
+	bottom: "Layer5"
+	top: "Layer6_proj_block"
+	name: "Layer6_proj_block"
+	type: "Convolution"
+	convolution_param {
+		num_output: 512
+		kernel_size: 1
+		pad: 0
+		stride: 1
+	}
+}
+
+layer {
+	bottom: "Layer6_proj_block"
+	bottom: "Layer6_block_1"
+	top: "Layer6"
+	name: "Layer6"
+	type: "Eltwise"
+}
+
+layer {
+	bottom: "Layer6"
+	top: "Layer6"
+	name: "Layer6_relu"
+	type: "ReLU"
+}
+
+# Layer7_cov_W (4, 512, 1, 1)
+
+layer {
+  name: "Layer7_cov"
+  type: "Convolution"
+  bottom: "Layer6"
+  top: "Layer7_cov"
+  convolution_param {
+    stride: 1
+    kernel_size: 1
+    pad: 0
+    num_output: 4
+  }
+}
+layer {
+  name: "Layer7_cov/sigmoid"
+  type: "Sigmoid"
+  bottom: "Layer7_cov"
+  top: "Layer7_cov"
+}
+
+# Layer7_bbox_W (16, 512, 1, 1)
+
+layer {
+  name: "Layer7_bbox"
+  type: "Convolution"
+  bottom: "Layer6"
+  top: "Layer7_bbox"
+  convolution_param {
+    stride: 1
+    kernel_size: 1
+    pad: 0
+    num_output: 16
+  }
+}

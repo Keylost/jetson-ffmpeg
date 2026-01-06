@@ -1,0 +1,18 @@
+TRT-7103-EntropyCalibration
+data: 3c010a01
+Layer1/relu_Y: 3d199d70
+Layer2_Y: 3d24d9d0
+Layer3_block_0_relu_Y: 3d30d8de
+Layer3_relu_Y: 3d33b5a2
+Layer4_block_0_relu_Y: 3d297a96
+Layer4_block_1_Y: 3d82aec1
+Layer4_relu_Y: 3d2fc5da
+Layer5_block_0_relu_Y: 3d6182bb
+Layer5_block_1_Y: 3cf56e15
+Layer5_relu_Y: 3d7e73ec
+Layer6_block_0_relu_Y: 3d5a15c9
+Layer6_block_1_Y: 3de050f6
+Layer6_relu_Y: 3da2a484
+Layer7_cov_Y: 3e648b88
+Layer7_bbox: 3d9f5106
+Layer7_cov: 3bfc2ab0

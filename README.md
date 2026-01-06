@@ -60,7 +60,7 @@ This library provides the ability to use hardware acceleration for video encodin
     cd jetson-ffmpeg
     mkdir build
     cd build
-    cmake ..
+    cmake -DJETSON_MULTIMEDIA_API_DIR=../jetson_multimedia_api ..
     make
     sudo make install
     sudo ldconfig
@@ -86,8 +86,49 @@ Build with stubs and custom dirs example:
     ./ffpatch.sh ../ffmpeg
     Go to ffmpeg sources directory configure and build ffmpeg with nvmpi enabled and your custom options 
     cd ../ffmpeg
-    ./configure --enable-nvmpi
-    make
+
+    # install dependencies
+    sudo apt install libvpx-dev libfdk-aac-dev libx264-dev libx265-dev
+    sudo apt install nvidia-cuda-toolkit
+
+    # clone ffnvcodec
+    git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
+    cd nv-codec-headers && sudo make install && cd ~
+
+    # configure ffmpeg
+    export PATH=/usr/local/cuda/bin:$PATH
+    cd ffmpeg
+    ./configure \
+    --enable-gpl \
+    --enable-nonfree \
+    --enable-shared \
+    \
+    --enable-openssl \
+    \
+    --enable-protocol=http \
+    --enable-protocol=https \
+    --enable-protocol=tcp \
+    --enable-protocol=tls \
+    --enable-protocol=file \
+    --enable-protocol=pipe \
+    \
+    --enable-demuxer=mov,matroska,webm,ogg \
+    --enable-decoder=opus,vorbis,aac,mp3 \
+    \
+    --enable-nvmpi \
+    --enable-cuda \
+    --enable-cuda-nvcc \
+    --enable-nvenc \
+    --enable-nvdec \
+    --enable-cuvid \
+    \
+    --extra-cflags="-I/usr/local/cuda-10.2/targets/aarch64-linux/include -I/usr/src/jetson_multimedia_api/include" \
+    --extra-ldflags="-L/usr/lib/aarch64-linux-gnu -L/usr/lib/aarch64-linux-gnu/tegra -L/usr/local/cuda-10.2/targets/aarch64-linux/lib" \
+    --extra-libs="-lcuda -lnvbuf_utils -lnvmedia" \
+    \
+    --enable-ffplay
+
+    make -j$(nproc)
     sudo make install
     
 **3.using**

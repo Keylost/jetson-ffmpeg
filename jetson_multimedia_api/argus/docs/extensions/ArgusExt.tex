@@ -1,0 +1,241 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{color, colortbl}
+\usepackage{longtable, tabu}
+\usepackage{hyperref}
+\usepackage[none]{hyphenat}
+
+% Set the default formatting for C++ code.
+\lstset{
+    language=C++,
+    backgroundcolor=\color{black!5},
+    basicstyle=\footnotesize,
+    xleftmargin=4em,
+    xrightmargin=4em,
+    showspaces=false,
+    showstringspaces=false,
+}
+
+% Set the default formatting for description lists.
+\setlist[description]{
+    style=standard,
+    align=parleft,
+    labelwidth=!,
+    labelindent=2em,
+    leftmargin=10em,
+}
+
+% Add slight padding between table rows.
+\tabulinesep=0.2em
+
+% Generic text classes.
+\newcommand{\classname}[1]{\textbf{#1}}
+\newcommand{\methodname}[1]{\textbf{#1}}
+\newcommand{\paramname}[1]{\textbf{#1}}
+\makeatletter
+\renewcommand{\paragraph}{\@startsection{paragraph}{4}{0ex}%
+    {-3.25ex plus -1ex minus -0.2ex}%
+    {1.5ex plus 0.2ex}%
+    {\normalfont\normalsize\bfseries}}
+\makeatother
+
+% Environment used for member tables in the form [Name | Type | Description]
+% Parameters: {Class/Interface name}{Label}
+\newenvironment{membertable}[2]
+{
+    \definecolor{TableHeader}{rgb}{0.5,0.7,0.9}
+    \begin{longtabu} to \linewidth {|l|l|X|}
+    \caption[#1]{#1\label{#2}} \\
+    \hline \rowcolor{TableHeader} Name & Type & Description \\ \hline
+    \endfirsthead
+    \multicolumn{3}{c}{{\bfseries \tablename\ \thetable{}: #1
+        -- continued from previous page}} \\
+    \hline \rowcolor{TableHeader} Name & Type & Description \\ \hline
+    \endhead
+}
+{
+    \end{longtabu}
+}
+
+\stepcounter{secnumdepth}
+\stepcounter{tocdepth}
+
+\begin{document}
+
+\title{Argus API Extensions 0.98}
+\date{April 15, 2020}
+
+\maketitle
+\thispagestyle{empty}
+\newpage
+\tableofcontents
+\pagenumbering{roman}
+\newpage
+\listoftables
+
+\newpage
+\pagenumbering{arabic}
+\section{BayerAverageMap}
+
+BayerAverageMap generates local averages of a capture's raw Bayer data. These averages are
+generated from small rectangles, called bins, that are evenly distributed across
+the image.
+
+This extension introduces two new interfaces:
+\subsection{IBayerAverageMapSettings} Provides methods to set bayer average map settings.
+\classname{IBayerAverageMapSettings} defines two methods:
+
+\begin{description}[style=nextline,align=left,leftmargin=4em]
+\item[setBayerAverageMapEnable()] Enables or disables Bayer average map generation.
+When enabled, \classname{CaptureMetadata} returned by completed captures will expose the
+\classname{IBayerAverageMap} interface.
+\item[getBayerAverageMapEnable()] Returns whether or not Bayer average map generation is enabled.
+\end{description}
+
+\subsection{IBayerAverageMap} Provides methods to get Bayer average map metadata. Each average
+is a floating-point value that is normalized such that [0.0, 1.0] maps to the full optical range
+of the output pixels, however values outside this range may be included in the averages so long
+as they are within the working range of the average calculation.
+For pixels that have values outside the working range, the API excludes such pixels from the
+average calculation and increments the clipped pixel counter for the containing region.
+
+The \classname{IBayerAverageMap} interface supports the following methods:
+
+\begin{description}[style=nextline,align=left,leftmargin=4em]
+\item[getBinStart()] Returns the starting location of the first bin, in pixels, where the
+location is relative to the top-left corner of the image.
+\item[getBinSize()] Returns the size of each bin, in pixels.
+\item[getBinCount()] Returns the number of bins in both the horizontal (width) and vertical
+(height) directions.
+\item[getBinInterval()] Returns the bin intervals for both the x and y axis, defined as the
+number of pixels between the first pixel of a bin and that o  f the adjacent bin.
+\item[getWorkingRange()] Returns the range of values that are included in the average
+calculation (not clipped), and may extend beyond the normalized [0.0, 1.0] range of the
+optical output.
+\item[getAverages()] Returns the average values for all bins normalized such that [0.0, 1.0]
+maps to the optical range of the output. Argus excludes input pixels that have values outside the working range
+\methodname{getWorkingRange()} from the average calculation, and counts them as clipped
+pixels \methodname{getClipCounts()}.
+\item[getClipCounts()] Returns, for all bins, the number of pixels whose value exceeds the working
+range and have been excluded from average calculation.
+\end{description}
+
+\section{BayerSharpnessMap}
+
+BayerSharpnessMap generates sharpness metrics that can be used to determine
+the correct position of the lens to achieve the best focus.
+
+This extension introduces two new interfaces:
+\subsection{IBayerSharpnessMapSettings} Provides methods to set Bayer sharpness map.
+\classname{IBayerSharpnessMapSettings} defines two methods:
+
+\begin{description}[style=nextline,align=left,leftmargin=4em]
+\item[setBayerSharpnessMapEnable()] Enables or disables Bayer sharpness map generation.
+When enabled, \classname{CaptureMetadata} returned by completed captures will expose the
+\classname{IBayerSharpnessMap} interface.
+\item[getBayerSharpnessMapEnable()] Returns whether or not Bayer sharpness map generation
+is enabled.
+\end{description}
+
+\subsection{IBayerSharpnessMap} Provides methods to get Bayer sharpness metrics. Each metric
+is a normalized floating-point value representing the estimated sharpness for a particular color
+channel and pixel region, called bins, where 0.0 and 1.0 map to the minimum and maximum possible
+sharpness values, respectively.
+
+The \classname{IBayerSharpnessMap} interface supports the following methods:
+
+\begin{description}[style=nextline,align=left,leftmargin=4em]
+\item[getBinStart()] Returns the starting location of the first bin, in pixels, where the
+location is relative to the top-left corner of the image.
+\item[getBinSize()] Returns the size of each bin, in pixels.
+\item[getBinCount()] Returns the number of bins in both the horizontal (width) and vertical
+(height) directions.
+\item[getBinInterval()] Returns the bin intervals for both the x and y axis, defined as the
+number of pixels between the first pixel of a bin and that of the adjacent bin.
+\item[getSharpnessValue()] Returns the sharpness values for all bins and color channels.
+\end{description}
+
+\section{NonLinearHistogram}
+
+NonLinearHistogram provides a method to interpret the compressed histogram data correctly.
+
+This extension introduces one new interface:
+\subsection{INonLinearHistogram} This interface returns the normalized bin values to correctly
+interpret the compressed bayer histogram data. This interface is available from histogram child
+objects returned by \methodname{ICaptureMetadata::getBayerHistogram()}.
+
+\classname{INonLinearHistogram} defines following method:
+\begin{description}[style=nextline,align=left,leftmargin=4em]
+\item[getHistogramBinValues()] Returns a floating point vector having normalized bins which maps
+the bin indexes of histogram \methodname{IBayerHistogram::getHistogram()}to the actual pixel
+values after considering compression. This vector has the same count as the vector returned by
+\methodname{IBayerHistogram::getBinCount()}.
+For Example:
+
+\begin{lstlisting}
+IBayerHistogram->getHistogram(&histogram);
+INonLinearHistogram->getBinValues(&values);
+for(int i = 0 ; i < histogram.size() ; i++)
+{
+        cout<<" bin: " << i
+        <<" normalized bin Value: " << values[i]
+        <<" frequency: " << histogram[i];
+}
+\end{lstlisting}
+\end{description}
+
+\section{PwlWdrSensorMode}
+
+PwlWdrSensorMode provideds extra functionalities for the Piecewise Linear (PWL)
+Wide Dynamic Range (WDR) sensor mode type.
+
+This extension introduces one new interface:
+\subsection{IPwlWdrSensorMode} This interface returns a list of normalized float coordinates (x,y)
+that defines the PWL compression curve used in the PWL WDR mode.
+This PWL compression curve is used by the sensor to compress WDR pixel values before sending
+them over CSI. This is done to save bandwidth for data transmission over
+VI-CSI. The compression converts the WDR pixel values from InputBitDepth
+space to OutputBitDepth space. The Bit depths can be
+obtained by using the respective methods in the ISensorMode interface.
+@see ISensorMode
+
+\classname{IPwlWdrSensorMode} defines the following methods:
+\begin{description}[style=nextline,align=left,leftmargin=4em]
+\item[getControlPointCount()] Returns the number of control points coordinates in the
+Piecewise Linear compression curve.
+\item[getControlPoints()] Returns the Piecewise Linear (PWL) compression curve coordinates.
+\end{description}
+
+\section{DolWdrSensorMode}
+
+DolWdrSensorMode provides extra functionalities for the Digital Overlap (DOL) Wide Dynamic
+Range (WDR) sensor mode type.
+
+This extension introduces one new interface:
+\subsection{IDolWdrSensorMode} This interface returns the extended properties specific to
+DOL WDR sensor mode. DOL WDR is a multi-exposure technology that enables the fusion of
+various exposures from a single frame to produce a WDR image. Basic sensor mode
+properties are available through the \classname{ISensorMode} interface.
+
+\classname{IDolWdrSensorMode} defines the following methods:
+\begin{description}[style=nextline,align=left,leftmargin=4em]
+\item[getExposureCount()] Returns the number of exposures captured per frame for this
+DOL WDR mode.
+\item[getOpticalBlackRowCount()] Returns the number of Optical Black rows at the start
+of each exposure in a DOL WDR frame.
+\item[getVerticalBlankPeriodRowCount()] Populates the verticalBlankPeriodRowCounts vector to
+store the vertical blank period rows per DOL WDR exposure. Size of the vector is
+\methodname{getExposureCount()} - 1 count values.
+\item[getLineInfoMarkerWidth()] Returns the line info markers width in pixels.
+These occur at the start of each pixel row to distinguish row types.
+\item[getLeftMarginWidth()] Returns the number of margin pixels on the left per row.
+\item[getRightMarginWidth()] Returns the number of margin pixels on the right per row.
+\item[getPhysicalResolution()] Returns the physical resolution derived due to interleaved
+exposure output from DOL WDR frames.
+\end{description}
+
+\end{document}

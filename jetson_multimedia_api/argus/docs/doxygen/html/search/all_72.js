@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['request',['Request',['../group__ArgusRequest.html',1,'']]],
+  ['rgbhistogram',['RGBHistogram',['../group__ArgusRGBHistogram.html',1,'']]],
+  ['r',['r',['../classArgus_1_1BayerTuple.html#a29754f59fb3a04b0b23944b36c10cff3',1,'Argus::BayerTuple::r()'],['../classArgus_1_1BayerTuple.html#a566ddd06c9760e3dd14b98f3516d4ae1',1,'Argus::BayerTuple::r() const '],['../classArgus_1_1RGBTuple.html#afcd7d2f419a385ef2bbc3d6c19d873dc',1,'Argus::RGBTuple::r()'],['../classArgus_1_1RGBTuple.html#a462c05c4a083c96ee2c8f7ed79ea0644',1,'Argus::RGBTuple::r() const ']]],
+  ['range',['Range',['../classArgus_1_1Range.html#a56e612f76e2106d9cc2764a80e1d2042',1,'Argus::Range::Range()'],['../classArgus_1_1Range.html#a41987c9bd953dc188cb46e057b5153b3',1,'Argus::Range::Range(const Tuple&lt; 2, T &gt; &amp;other)'],['../classArgus_1_1Range.html#a3999092f7affc7f359829d3e939a14c3',1,'Argus::Range::Range(T init)'],['../classArgus_1_1Range.html#afae3e536c4dda53f7e86722decf25030',1,'Argus::Range::Range(T _min, T _max)']]],
+  ['range',['Range',['../classArgus_1_1Range.html',1,'Argus']]],
+  ['rectangle',['Rectangle',['../classArgus_1_1Rectangle.html',1,'Argus']]],
+  ['rectangle',['Rectangle',['../classArgus_1_1Rectangle.html#adf2e0f359341d68ba4a00a53aa105cea',1,'Argus::Rectangle::Rectangle()'],['../classArgus_1_1Rectangle.html#a198a8e574ac7e52b5a34edcaa0163d0e',1,'Argus::Rectangle::Rectangle(const Tuple&lt; 4, T &gt; &amp;other)'],['../classArgus_1_1Rectangle.html#af5787ac9e5609f52b2bbaf22de0f6cbd',1,'Argus::Rectangle::Rectangle(T init)'],['../classArgus_1_1Rectangle.html#ae9a655567c7f14cc0dbdfcf125e32431',1,'Argus::Rectangle::Rectangle(T _left, T _top, T _right, T _bottom)']]],
+  ['rectangle_3c_20uint32_5ft_20_3e',['Rectangle&lt; uint32_t &gt;',['../classArgus_1_1Rectangle.html',1,'Argus']]],
+  ['release',['release',['../classArgus_1_1UniqueObj.html#a6a16389a84396383e7398be6eed5ae07',1,'Argus::UniqueObj']]],
+  ['releasebuffer',['releaseBuffer',['../classArgus_1_1IBufferOutputStream.html#a30e1077668ddcf359eb2ff7c771d7aab',1,'Argus::IBufferOutputStream']]],
+  ['repeat',['repeat',['../classArgus_1_1ICaptureSession.html#a76f0c7a185351ddeb521e4d0f46b8ca2',1,'Argus::ICaptureSession']]],
+  ['repeatburst',['repeatBurst',['../classArgus_1_1ICaptureSession.html#aedf68af40770a5728c9a8572dba79da3',1,'Argus::ICaptureSession']]],
+  ['request',['Request',['../classArgus_1_1Request.html',1,'Argus']]],
+  ['request_2eh',['Request.h',['../Request_8h.html',1,'']]],
+  ['reset',['reset',['../classArgus_1_1UniqueObj.html#ae6cb4e063009b5128e9ae1d2ce946c52',1,'Argus::UniqueObj']]],
+  ['resize',['resize',['../classArgus_1_1Array2D.html#ae6166f6a5a3d6c48d93eec349b41b063',1,'Argus::Array2D']]],
+  ['rgb_5fchannel_5fb',['RGB_CHANNEL_B',['../namespaceArgus.html#a03bc9c133b0c1b7e7b6d12856058f0b0a55b19e84d40005a489f53d045cb112a9',1,'Argus']]],
+  ['rgb_5fchannel_5fcount',['RGB_CHANNEL_COUNT',['../namespaceArgus.html#a03bc9c133b0c1b7e7b6d12856058f0b0a410dbd53edc1206c3c9ea3a46b1c856f',1,'Argus']]],
+  ['rgb_5fchannel_5fg',['RGB_CHANNEL_G',['../namespaceArgus.html#a03bc9c133b0c1b7e7b6d12856058f0b0a5ec9528aa0ed1eba2abf7a01d99650f6',1,'Argus']]],
+  ['rgb_5fchannel_5fr',['RGB_CHANNEL_R',['../namespaceArgus.html#a03bc9c133b0c1b7e7b6d12856058f0b0ab55f8942510360d09e091910aab43bee',1,'Argus']]],
+  ['rgbchannel',['RGBChannel',['../namespaceArgus.html#a03bc9c133b0c1b7e7b6d12856058f0b0',1,'Argus']]],
+  ['rgbtuple',['RGBTuple',['../classArgus_1_1RGBTuple.html',1,'Argus']]],
+  ['rgbtuple',['RGBTuple',['../classArgus_1_1RGBTuple.html#a58018eb7737c918cb08f06cd53cb6e0f',1,'Argus::RGBTuple::RGBTuple()'],['../classArgus_1_1RGBTuple.html#afce945d9bb02ab48ed765317dad88e1d',1,'Argus::RGBTuple::RGBTuple(const Tuple&lt; RGB_CHANNEL_COUNT, T &gt; &amp;other)'],['../classArgus_1_1RGBTuple.html#a65b588e522647e157fd1a140dc194659',1,'Argus::RGBTuple::RGBTuple(T init)'],['../classArgus_1_1RGBTuple.html#a1abb5a3f2b59c94db7b384c3815612d3',1,'Argus::RGBTuple::RGBTuple(T _r, T _g, T _b)']]],
+  ['right',['right',['../classArgus_1_1Rectangle.html#a9af576b44868a524ae6cd95df301488c',1,'Argus::Rectangle::right()'],['../classArgus_1_1Rectangle.html#a4e33e2a2dcd462e59fc95ef2be184268',1,'Argus::Rectangle::right() const ']]]
+];
