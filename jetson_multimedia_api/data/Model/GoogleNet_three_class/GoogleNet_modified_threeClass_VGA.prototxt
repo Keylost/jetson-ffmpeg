@@ -1,0 +1,1406 @@
+name: "googlenet_iva_VGA"
+input: "data"
+input_dim: 1
+input_dim: 3
+input_dim: 368
+input_dim: 640
+
+
+################################################################################
+# Start of neural network
+################################################################################
+
+layer {
+  name: "Layer1"
+  type: "Convolution"
+  bottom: "data"
+  top: "Layer1"
+  convolution_param {
+    stride: 2
+    pad: 3
+    kernel_size: 7
+    num_output: 64
+  }
+}
+
+layer {
+  name: "Layer1/relu"
+  type: "ReLU"
+  bottom: "Layer1"
+  top: "Layer1"
+}
+
+## Pooling layer creates extra dims truncate it
+## So HACK is to use kernel_size = 2 and pad = 0
+
+layer {
+  name: "Layer2"
+  type: "Pooling"
+  bottom: "Layer1"
+  top: "Layer2"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+    pad: 0
+  }
+}
+
+layer {
+  name: "Layer3/LRN"
+  type: "LRN"
+  bottom: "Layer2"
+  top: "Layer3/LRN"
+  lrn_param {
+    local_size: 5
+    alpha: 0.0001
+    beta: 0.75
+  }
+}
+
+layer {
+  name: "Layer3"
+  type: "Convolution"
+  bottom: "Layer3/LRN"
+  top: "Layer3"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 64
+  }
+}
+
+layer {
+  name: "Layer3/relu"
+  type: "ReLU"
+  bottom: "Layer3"
+  top: "Layer3"
+}
+
+layer {
+  name: "Layer4"
+  type: "Convolution"
+  bottom: "Layer3"
+  top: "Layer4"
+  convolution_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    num_output: 192
+  }
+}
+
+layer {
+  name: "Layer4/relu"
+  type: "ReLU"
+  bottom: "Layer4"
+  top: "Layer4"
+}
+
+layer {
+  name: "Layer4/LRN"
+  type: "LRN"
+  bottom: "Layer4"
+  top: "Layer4/LRN"
+  lrn_param {
+    local_size: 5
+    alpha: 0.0001
+    beta: 0.75
+  }
+}
+
+## Pooling layer creates extra dims truncate it
+## So HACK is to use kernel_size = 2 and pad = 0
+
+layer {
+  name: "Layer5"
+  type: "Pooling"
+  bottom: "Layer4/LRN"
+  top: "Layer5"
+  pooling_param {
+    stride: 2
+    kernel_size: 2
+    pool: MAX
+    pad: 0
+  }
+}
+
+layer {
+  name: "Layer6_0"
+  type: "Convolution"
+  bottom: "Layer5"
+  top: "Layer6_0"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 64
+  }
+}
+
+layer {
+  name: "Layer6_0/relu"
+  type: "ReLU"
+  bottom: "Layer6_0"
+  top: "Layer6_0"
+}
+
+layer {
+  name: "Layer6_1"
+  type: "Convolution"
+  bottom: "Layer5"
+  top: "Layer6_1"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 96
+  }
+}
+
+layer {
+  name: "Layer6_1/relu"
+  type: "ReLU"
+  bottom: "Layer6_1"
+  top: "Layer6_1"
+}
+
+layer {
+  name: "Layer6_2"
+  type: "Convolution"
+  bottom: "Layer6_1"
+  top: "Layer6_2"
+  convolution_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    num_output: 128
+  }
+}
+
+layer {
+  name: "Layer6_2/relu"
+  type: "ReLU"
+  bottom: "Layer6_2"
+  top: "Layer6_2"
+}
+
+layer {
+  name: "Layer6_3"
+  type: "Convolution"
+  bottom: "Layer5"
+  top: "Layer6_3"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 16
+  }
+}
+
+layer {
+  name: "Layer6_3/relu"
+  type: "ReLU"
+  bottom: "Layer6_3"
+  top: "Layer6_3"
+}
+
+layer {
+  name: "Layer6_4"
+  type: "Convolution"
+  bottom: "Layer6_3"
+  top: "Layer6_4"
+  convolution_param {
+    stride: 1
+    pad: 2
+    kernel_size: 5
+    num_output: 32
+  }
+}
+
+layer {
+  name: "Layer6_4/relu"
+  type: "ReLU"
+  bottom: "Layer6_4"
+  top: "Layer6_4"
+}
+
+layer {
+  name: "Layer6_5"
+  type: "Pooling"
+  bottom: "Layer5"
+  top: "Layer6_5"
+  pooling_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    pool: MAX
+  }
+}
+
+layer {
+  name: "Layer6_6"
+  type: "Convolution"
+  bottom: "Layer6_5"
+  top: "Layer6_6"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 32
+  }
+}
+
+layer {
+  name: "Layer6_6/relu"
+  type: "ReLU"
+  bottom: "Layer6_6"
+  top: "Layer6_6"
+}
+
+
+layer {
+  name: "inception_3a/output"
+  type: "Concat"
+  bottom: "Layer6_0"
+  bottom: "Layer6_2"
+  bottom: "Layer6_4"
+  bottom: "Layer6_6"
+  top: "inception_3a/output"
+}
+
+layer {
+  name: "Layer7_0"
+  type: "Convolution"
+  bottom: "inception_3a/output"
+  top: "Layer7_0"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 128
+  }
+}
+
+layer {
+  name: "Layer7_0/relu"
+  type: "ReLU"
+  bottom: "Layer7_0"
+  top: "Layer7_0"
+}
+
+layer {
+  name: "Layer7_1"
+  type: "Convolution"
+  bottom: "inception_3a/output"
+  top: "Layer7_1"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 128
+  }
+}
+
+layer {
+  name: "Layer7_1/relu"
+  type: "ReLU"
+  bottom: "Layer7_1"
+  top: "Layer7_1"
+}
+
+layer {
+  name: "Layer7_2"
+  type: "Convolution"
+  bottom: "Layer7_1"
+  top: "Layer7_2"
+  convolution_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    num_output: 136
+  }
+}
+
+layer {
+  name: "Layer7_2/relu"
+  type: "ReLU"
+  bottom: "Layer7_2"
+  top: "Layer7_2"
+}
+
+layer {
+  name: "Layer7_3"
+  type: "Convolution"
+  bottom: "inception_3a/output"
+  top: "Layer7_3"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 32
+  }
+}
+
+layer {
+  name: "Layer7_3/relu"
+  type: "ReLU"
+  bottom: "Layer7_3"
+  top: "Layer7_3"
+}
+
+layer {
+  name: "Layer7_4"
+  type: "Convolution"
+  bottom: "Layer7_3"
+  top: "Layer7_4"
+  convolution_param {
+    stride: 1
+    pad: 2
+    kernel_size: 5
+    num_output: 96
+  }
+}
+
+layer {
+  name: "Layer7_4/relu"
+  type: "ReLU"
+  bottom: "Layer7_4"
+  top: "Layer7_4"
+}
+
+layer {
+  name: "Layer7_5"
+  type: "Pooling"
+  bottom: "inception_3a/output"
+  top: "Layer7_5"
+  pooling_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    pool: MAX
+  }
+}
+
+layer {
+  name: "Layer7_6"
+  type: "Convolution"
+  bottom: "Layer7_5"
+  top: "Layer7_6"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 56
+  }
+}
+
+layer {
+  name: "Layer7_6/relu"
+  type: "ReLU"
+  bottom: "Layer7_6"
+  top: "Layer7_6"
+}
+
+
+layer {
+  name: "inception_3b/output"
+  type: "Concat"
+  bottom: "Layer7_0"
+  bottom: "Layer7_2"
+  bottom: "Layer7_4"
+  bottom: "Layer7_6"
+  top: "inception_3b/output"
+}
+
+## Pooling layer creates extra dims truncate it
+## So HACK is to use kernel_size = 2 and pad = 0
+
+layer {
+  name: "Layer8"
+  type: "Pooling"
+  bottom: "inception_3b/output"
+  top: "Layer8"
+  pooling_param {
+    stride: 2
+    kernel_size: 2
+    pool: MAX
+    pad: 0
+  }
+}
+
+
+layer {
+  name: "Layer9_0"
+  type: "Convolution"
+  bottom: "Layer8"
+  top: "Layer9_0"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 152
+  }
+}
+
+layer {
+  name: "Layer9_0/relu"
+  type: "ReLU"
+  bottom: "Layer9_0"
+  top: "Layer9_0"
+}
+
+layer {
+  name: "Layer9_1"
+  type: "Convolution"
+  bottom: "Layer8"
+  top: "Layer9_1"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 96
+  }
+}
+
+layer {
+  name: "Layer9_1/relu"
+  type: "ReLU"
+  bottom: "Layer9_1"
+  top: "Layer9_1"
+}
+
+layer {
+  name: "Layer9_2"
+  type: "Convolution"
+  bottom: "Layer9_1"
+  top: "Layer9_2"
+  convolution_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    num_output: 120
+  }
+}
+
+layer {
+  name: "Layer9_2/relu"
+  type: "ReLU"
+  bottom: "Layer9_2"
+  top: "Layer9_2"
+}
+
+layer {
+  name: "Layer9_3"
+  type: "Convolution"
+  bottom: "Layer8"
+  top: "Layer9_3"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 16
+  }
+}
+
+layer {
+  name: "Layer9_3/relu"
+  type: "ReLU"
+  bottom: "Layer9_3"
+  top: "Layer9_3"
+}
+
+layer {
+  name: "Layer9_4"
+  type: "Convolution"
+  bottom: "Layer9_3"
+  top: "Layer9_4"
+  convolution_param {
+    stride: 1
+    pad: 2
+    kernel_size: 5
+    num_output: 48
+  }
+}
+
+layer {
+  name: "Layer9_4/relu"
+  type: "ReLU"
+  bottom: "Layer9_4"
+  top: "Layer9_4"
+}
+
+layer {
+  name: "Layer9_5"
+  type: "Pooling"
+  bottom: "Layer8"
+  top: "Layer9_5"
+  pooling_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    pool: MAX
+  }
+}
+
+layer {
+  name: "Layer9_6"
+  type: "Convolution"
+  bottom: "Layer9_5"
+  top: "Layer9_6"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 40
+  }
+}
+
+layer {
+  name: "Layer9_6/relu"
+  type: "ReLU"
+  bottom: "Layer9_6"
+  top: "Layer9_6"
+}
+
+
+layer {
+  name: "inception_4a/output"
+  type: "Concat"
+  bottom: "Layer9_0"
+  bottom: "Layer9_2"
+  bottom: "Layer9_4"
+  bottom: "Layer9_6"
+  top: "inception_4a/output"
+}
+
+layer {
+  name: "Layer10_0"
+  type: "Convolution"
+  bottom: "inception_4a/output"
+  top: "Layer10_0"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 144
+  }
+}
+
+layer {
+  name: "Layer10_0/relu"
+  type: "ReLU"
+  bottom: "Layer10_0"
+  top: "Layer10_0"
+}
+
+layer {
+  name: "Layer10_1"
+  type: "Convolution"
+  bottom: "inception_4a/output"
+  top: "Layer10_1"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 88
+  }
+}
+
+layer {
+  name: "Layer10_1/relu"
+  type: "ReLU"
+  bottom: "Layer10_1"
+  top: "Layer10_1"
+}
+
+layer {
+  name: "Layer10_2"
+  type: "Convolution"
+  bottom: "Layer10_1"
+  top: "Layer10_2"
+  convolution_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    num_output: 112
+  }
+}
+
+layer {
+  name: "Layer10_2/relu"
+  type: "ReLU"
+  bottom: "Layer10_2"
+  top: "Layer10_2"
+}
+
+layer {
+  name: "Layer10_3"
+  type: "Convolution"
+  bottom: "inception_4a/output"
+  top: "Layer10_3"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 24
+  }
+}
+
+layer {
+  name: "Layer10_3/relu"
+  type: "ReLU"
+  bottom: "Layer10_3"
+  top: "Layer10_3"
+}
+
+layer {
+  name: "Layer10_4"
+  type: "Convolution"
+  bottom: "Layer10_3"
+  top: "Layer10_4"
+  convolution_param {
+    stride: 1
+    pad: 2
+    kernel_size: 5
+    num_output: 56
+  }
+}
+
+layer {
+  name: "Layer10_4/relu"
+  type: "ReLU"
+  bottom: "Layer10_4"
+  top: "Layer10_4"
+}
+
+layer {
+  name: "Layer10_5"
+  type: "Pooling"
+  bottom: "inception_4a/output"
+  top: "Layer10_5"
+  pooling_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    pool: MAX
+  }
+}
+
+layer {
+  name: "Layer10_6"
+  type: "Convolution"
+  bottom: "Layer10_5"
+  top: "Layer10_6"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 40
+  }
+}
+
+layer {
+  name: "Layer10_6/relu"
+  type: "ReLU"
+  bottom: "Layer10_6"
+  top: "Layer10_6"
+}
+
+layer {
+  name: "inception_4b/output"
+  type: "Concat"
+  bottom: "Layer10_0"
+  bottom: "Layer10_2"
+  bottom: "Layer10_4"
+  bottom: "Layer10_6"
+  top: "inception_4b/output"
+}
+
+layer {
+  name: "Layer11_0"
+  type: "Convolution"
+  bottom: "inception_4b/output"
+  top: "Layer11_0"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 104
+  }
+}
+
+layer {
+  name: "Layer11_0/relu"
+  type: "ReLU"
+  bottom: "Layer11_0"
+  top: "Layer11_0"
+}
+
+layer {
+  name: "Layer11_1"
+  type: "Convolution"
+  bottom: "inception_4b/output"
+  top: "Layer11_1"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 104
+  }
+}
+
+layer {
+  name: "Layer11_1/relu"
+  type: "ReLU"
+  bottom: "Layer11_1"
+  top: "Layer11_1"
+}
+
+layer {
+  name: "Layer11_2"
+  type: "Convolution"
+  bottom: "Layer11_1"
+  top: "Layer11_2"
+  convolution_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    num_output: 88
+  }
+}
+
+layer {
+  name: "Layer11_2/relu"
+  type: "ReLU"
+  bottom: "Layer11_2"
+  top: "Layer11_2"
+}
+
+layer {
+  name: "Layer11_3"
+  type: "Convolution"
+  bottom: "inception_4b/output"
+  top: "Layer11_3"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 24
+  }
+}
+layer {
+  name: "Layer11_3/relu"
+  type: "ReLU"
+  bottom: "Layer11_3"
+  top: "Layer11_3"
+}
+
+layer {
+  name: "Layer11_4"
+  type: "Convolution"
+  bottom: "Layer11_3"
+  top: "Layer11_4"
+  convolution_param {
+    stride: 1
+    pad: 2
+    kernel_size: 5
+    num_output: 56
+  }
+}
+layer {
+  name: "Layer11_4/relu"
+  type: "ReLU"
+  bottom: "Layer11_4"
+  top: "Layer11_4"
+}
+
+layer {
+  name: "Layer11_5"
+  type: "Pooling"
+  bottom: "inception_4b/output"
+  top: "Layer11_5"
+  pooling_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    pool: MAX
+  }
+}
+
+layer {
+  name: "Layer11_6"
+  type: "Convolution"
+  bottom: "Layer11_5"
+  top: "Layer11_6"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 32
+  }
+}
+layer {
+  name: "Layer11_6/relu"
+  type: "ReLU"
+  bottom: "Layer11_6"
+  top: "Layer11_6"
+}
+layer {
+  name: "inception_4c/output"
+  type: "Concat"
+  bottom: "Layer11_0"
+  bottom: "Layer11_2"
+  bottom: "Layer11_4"
+  bottom: "Layer11_6"
+  top: "inception_4c/output"
+}
+layer {
+  name: "Layer12_0"
+  type: "Convolution"
+  bottom: "inception_4c/output"
+  top: "Layer12_0"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 88
+  }
+}
+layer {
+  name: "Layer12_0/relu"
+  type: "ReLU"
+  bottom: "Layer12_0"
+  top: "Layer12_0"
+}
+
+layer {
+  name: "Layer12_1"
+  type: "Convolution"
+  bottom: "inception_4c/output"
+  top: "Layer12_1"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 80
+  }
+}
+layer {
+  name: "Layer12_1/relu"
+  type: "ReLU"
+  bottom: "Layer12_1"
+  top: "Layer12_1"
+}
+layer {
+  name: "Layer12_2"
+  type: "Convolution"
+  bottom: "Layer12_1"
+  top: "Layer12_2"
+  convolution_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    num_output: 104
+  }
+}
+layer {
+  name: "Layer12_2/relu"
+  type: "ReLU"
+  bottom: "Layer12_2"
+  top: "Layer12_2"
+}
+layer {
+  name: "Layer12_3"
+  type: "Convolution"
+  bottom: "inception_4c/output"
+  top: "Layer12_3"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 32
+  }
+}
+layer {
+  name: "Layer12_3/relu"
+  type: "ReLU"
+  bottom: "Layer12_3"
+  top: "Layer12_3"
+}
+layer {
+  name: "Layer12_4"
+  type: "Convolution"
+  bottom: "Layer12_3"
+  top: "Layer12_4"
+  convolution_param {
+    stride: 1
+    pad: 2
+    kernel_size: 5
+    num_output: 48
+  }
+}
+layer {
+  name: "Layer12_4/relu"
+  type: "ReLU"
+  bottom: "Layer12_4"
+  top: "Layer12_4"
+}
+layer {
+  name: "Layer12_5"
+  type: "Pooling"
+  bottom: "inception_4c/output"
+  top: "Layer12_5"
+  pooling_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    pool: MAX
+  }
+}
+layer {
+  name: "Layer12_6"
+  type: "Convolution"
+  bottom: "Layer12_5"
+  top: "Layer12_6"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 24
+  }
+}
+layer {
+  name: "Layer12_6/relu"
+  type: "ReLU"
+  bottom: "Layer12_6"
+  top: "Layer12_6"
+}
+layer {
+  name: "inception_4d/output"
+  type: "Concat"
+  bottom: "Layer12_0"
+  bottom: "Layer12_2"
+  bottom: "Layer12_4"
+  bottom: "Layer12_6"
+  top: "inception_4d/output"
+}
+layer {
+  name: "Layer13_0"
+  type: "Convolution"
+  bottom: "inception_4d/output"
+  top: "Layer13_0"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 128
+  }
+}
+layer {
+  name: "Layer13_0/relu"
+  type: "ReLU"
+  bottom: "Layer13_0"
+  top: "Layer13_0"
+}
+layer {
+  name: "Layer13_1"
+  type: "Convolution"
+  bottom: "inception_4d/output"
+  top: "Layer13_1"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 128
+  }
+}
+layer {
+  name: "Layer13_1/relu"
+  type: "ReLU"
+  bottom: "Layer13_1"
+  top: "Layer13_1"
+}
+layer {
+  name: "Layer13_2"
+  type: "Convolution"
+  bottom: "Layer13_1"
+  top: "Layer13_2"
+  convolution_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    num_output: 272
+  }
+}
+layer {
+  name: "Layer13_2/relu"
+  type: "ReLU"
+  bottom: "Layer13_2"
+  top: "Layer13_2"
+}
+layer {
+  name: "Layer13_3"
+  type: "Convolution"
+  bottom: "inception_4d/output"
+  top: "Layer13_3"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 24
+  }
+}
+layer {
+  name: "Layer13_3/relu"
+  type: "ReLU"
+  bottom: "Layer13_3"
+  top: "Layer13_3"
+}
+layer {
+  name: "Layer13_4"
+  type: "Convolution"
+  bottom: "Layer13_3"
+  top: "Layer13_4"
+  convolution_param {
+    stride: 1
+    pad: 2
+    kernel_size: 5
+    num_output: 24
+  }
+}
+layer {
+  name: "Layer13_4/relu"
+  type: "ReLU"
+  bottom: "Layer13_4"
+  top: "Layer13_4"
+}
+layer {
+  name: "Layer13_5"
+  type: "Pooling"
+  bottom: "inception_4d/output"
+  top: "Layer13_5"
+  pooling_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    pool: MAX
+  }
+}
+layer {
+  name: "Layer13_6"
+  type: "Convolution"
+  bottom: "Layer13_5"
+  top: "Layer13_6"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 40
+  }
+}
+layer {
+  name: "Layer13_6/relu"
+  type: "ReLU"
+  bottom: "Layer13_6"
+  top: "Layer13_6"
+}
+layer {
+  name: "inception_4e/output"
+  type: "Concat"
+  bottom: "Layer13_0"
+  bottom: "Layer13_2"
+  bottom: "Layer13_4"
+  bottom: "Layer13_6"
+  top: "inception_4e/output"
+}
+layer {
+  name: "Layer14_0"
+  type: "Convolution"
+  bottom: "inception_4e/output"
+  top: "Layer14_0"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 128
+  }
+}
+layer {
+  name: "Layer14_0/relu"
+  type: "ReLU"
+  bottom: "Layer14_0"
+  top: "Layer14_0"
+}
+layer {
+  name: "Layer14_1"
+  type: "Convolution"
+  bottom: "inception_4e/output"
+  top: "Layer14_1"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 88
+  }
+}
+layer {
+  name: "Layer14_1/relu"
+  type: "ReLU"
+  bottom: "Layer14_1"
+  top: "Layer14_1"
+}
+layer {
+  name: "Layer14_2"
+  type: "Convolution"
+  bottom: "Layer14_1"
+  top: "Layer14_2"
+  convolution_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    num_output: 104
+  }
+}
+layer {
+  name: "Layer14_2/relu"
+  type: "ReLU"
+  bottom: "Layer14_2"
+  top: "Layer14_2"
+}
+layer {
+  name: "Layer14_3"
+  type: "Convolution"
+  bottom: "inception_4e/output"
+  top: "Layer14_3"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 24
+  }
+}
+layer {
+  name: "Layer14_3/relu"
+  type: "ReLU"
+  bottom: "Layer14_3"
+  top: "Layer14_3"
+}
+layer {
+  name: "Layer14_4"
+  type: "Convolution"
+  bottom: "Layer14_3"
+  top: "Layer14_4"
+  convolution_param {
+    stride: 1
+    pad: 2
+    kernel_size: 5
+    num_output: 88
+  }
+}
+layer {
+  name: "Layer14_4/relu"
+  type: "ReLU"
+  bottom: "Layer14_4"
+  top: "Layer14_4"
+}
+layer {
+  name: "Layer14_5"
+  type: "Pooling"
+  bottom: "inception_4e/output"
+  top: "Layer14_5"
+  pooling_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    pool: MAX
+  }
+}
+layer {
+  name: "Layer14_6"
+  type: "Convolution"
+  bottom: "Layer14_5"
+  top: "Layer14_6"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 32
+  }
+}
+layer {
+  name: "Layer14_6/relu"
+  type: "ReLU"
+  bottom: "Layer14_6"
+  top: "Layer14_6"
+}
+layer {
+  name: "inception_5a/output"
+  type: "Concat"
+  bottom: "Layer14_0"
+  bottom: "Layer14_2"
+  bottom: "Layer14_4"
+  bottom: "Layer14_6"
+  top: "inception_5a/output"
+}
+layer {
+  name: "Layer15_0"
+  type: "Convolution"
+  bottom: "inception_5a/output"
+  top: "Layer15_0"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 136
+  }
+}
+layer {
+  name: "Layer15_0/relu"
+  type: "ReLU"
+  bottom: "Layer15_0"
+  top: "Layer15_0"
+}
+layer {
+  name: "Layer15_1"
+  type: "Convolution"
+  bottom: "inception_5a/output"
+  top: "Layer15_1"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 80
+  }
+}
+layer {
+  name: "Layer15_1/relu"
+  type: "ReLU"
+  bottom: "Layer15_1"
+  top: "Layer15_1"
+}
+layer {
+  name: "Layer15_2"
+  type: "Convolution"
+  bottom: "Layer15_1"
+  top: "Layer15_2"
+  convolution_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    num_output: 136
+  }
+}
+layer {
+  name: "Layer15_2/relu"
+  type: "ReLU"
+  bottom: "Layer15_2"
+  top: "Layer15_2"
+}
+layer {
+  name: "Layer15_3"
+  type: "Convolution"
+  bottom: "inception_5a/output"
+  top: "Layer15_3"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 16
+  }
+}
+layer {
+  name: "Layer15_3/relu"
+  type: "ReLU"
+  bottom: "Layer15_3"
+  top: "Layer15_3"
+}
+layer {
+  name: "Layer15_4"
+  type: "Convolution"
+  bottom: "Layer15_3"
+  top: "Layer15_4"
+  convolution_param {
+    stride: 1
+    pad: 2
+    kernel_size: 5
+    num_output: 64
+  }
+}
+layer {
+  name: "Layer15_4/relu"
+  type: "ReLU"
+  bottom: "Layer15_4"
+  top: "Layer15_4"
+}
+layer {
+  name: "Layer15_5"
+  type: "Pooling"
+  bottom: "inception_5a/output"
+  top: "Layer15_5"
+  pooling_param {
+    stride: 1
+    pad: 1
+    kernel_size: 3
+    pool: MAX
+  }
+}
+layer {
+  name: "Layer15_6"
+  type: "Convolution"
+  bottom: "Layer15_5"
+  top: "Layer15_6"
+  convolution_param {
+    stride: 1
+    pad: 0
+    kernel_size: 1
+    num_output: 40
+  }
+}
+layer {
+  name: "Layer15_6/relu"
+  type: "ReLU"
+  bottom: "Layer15_6"
+  top: "Layer15_6"
+}
+layer {
+  name: "inception_5b/output"
+  type: "Concat"
+  bottom: "Layer15_0"
+  bottom: "Layer15_2"
+  bottom: "Layer15_4"
+  bottom: "Layer15_6"
+  top: "inception_5b/output"
+}
+layer {
+  name: "Layer16_cov"
+  type: "Convolution"
+  bottom: "inception_5b/output"
+  top: "Layer16_cov"
+  convolution_param {
+    stride: 1
+    kernel_size: 1
+    pad: 0
+    num_output: 3
+  }
+}
+layer {
+  name: "Layer16_cov/sigmoid"
+  type: "Sigmoid"
+  bottom: "Layer16_cov"
+  top: "Layer16_cov"
+}
+layer {
+  name: "Layer16_bbox"
+  type: "Convolution"
+  bottom: "inception_5b/output"
+  top: "Layer16_bbox"
+  convolution_param {
+    stride: 1
+    kernel_size: 1
+    pad: 0
+    num_output: 12
+  }
+}
+
